@@ -1,15 +1,8 @@
 import { useState } from 'react'
-import { Search, Download, MoreVertical, Edit, Trash2, Mail, Phone } from 'lucide-react'
-import { Card, Badge, Select } from '../../components/ui'
+import { Search, Download, Mail, Phone, Edit, Trash2 } from 'lucide-react'
+import { Card, Badge, Button, Input, Select } from '../../components/ui'
 import Avatar from '../../components/ui/Avatar'
-
-const mockVolunteers = [
-  { id: 1, name: 'Priya Sharma', email: 'priya@example.com', phone: '+91 9876543210', skills: ['Medical', 'Teaching'], status: 'active', tasksCompleted: 12, joinedAt: '2026-03-01' },
-  { id: 2, name: 'Amit Kumar', email: 'amit@example.com', phone: '+91 9876543211', skills: ['Logistics', 'Driving'], status: 'active', tasksCompleted: 8, joinedAt: '2026-03-15' },
-  { id: 3, name: 'Neha Gupta', email: 'neha@example.com', phone: '+91 9876543212', skills: ['Tech', 'Admin'], status: 'active', tasksCompleted: 5, joinedAt: '2026-03-20' },
-  { id: 4, name: 'Raj Patel', email: 'raj@example.com', phone: '+91 9876543213', skills: ['Medical'], status: 'inactive', tasksCompleted: 3, joinedAt: '2026-02-15' },
-  { id: 5, name: 'Sita Devi', email: 'sita@example.com', phone: '+91 9876543214', skills: ['Cooking', 'Logistics'], status: 'active', tasksCompleted: 15, joinedAt: '2026-01-20' },
-]
+import { useVolunteerStore } from '../../store/volunteerStore'
 
 const statusOptions = [
   { value: '', label: 'All Status' },
@@ -26,11 +19,12 @@ const skillOptions = [
 ]
 
 export default function AdminVolunteerTable() {
+  const { volunteers } = useVolunteerStore()
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('')
   const [skill, setSkill] = useState('')
 
-  const filteredVolunteers = mockVolunteers.filter(vol => {
+  const filteredVolunteers = volunteers.filter(vol => {
     if (search && !vol.name.toLowerCase().includes(search.toLowerCase())) return false
     if (status && vol.status !== status) return false
     if (skill && !vol.skills.includes(skill)) return false
@@ -53,12 +47,11 @@ export default function AdminVolunteerTable() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#1A1A1A]">Volunteers</h1>
-          <p className="text-[#6B6B6B]">Manage your volunteer team.</p>
+          <h1 className="text-2xl font-bold tracking-tight">Volunteers<span className="text-[#D6CCC2]">.</span></h1>
+          <p className="text-white/50 mt-1">Manage your volunteer team</p>
         </div>
-        <Button variant="secondary" onClick={handleExport}>
-          <Download size={16} className="mr-2" />
-          Export CSV
+        <Button variant="ghost" onClick={handleExport} className="gap-2 text-white/60 hover:text-white">
+          <Download size={16} /> EXPORT
         </Button>
       </div>
 
@@ -66,13 +59,13 @@ export default function AdminVolunteerTable() {
       <Card className="p-4">
         <div className="flex flex-wrap gap-4">
           <div className="relative flex-1 min-w-[200px]">
-            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]" />
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
             <input
               type="text"
-              placeholder="Search volunteers..."
+              placeholder="SEARCH VOLUNTEERS..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full h-10 pl-10 pr-4 bg-white border border-[#E5E5E5] rounded-lg focus:outline-none focus:border-2 focus:border-[#D6CCC2]"
+              className="w-full h-10 pl-9 pr-4 bg-white/[0.03] border border-white/10 rounded-lg text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#D6CCC2]/50 uppercase tracking-wider"
             />
           </div>
           <Select
@@ -91,28 +84,28 @@ export default function AdminVolunteerTable() {
       </Card>
 
       {/* Table */}
-      <Card padding="none">
+      <Card padding="none" className="overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-[#FAFAFA] border-b border-[#E5E5E5]">
+            <thead className="bg-white/[0.02] border-b border-white/[0.06]">
               <tr>
-                <th className="text-left text-sm font-medium text-[#6B6B6B] px-6 py-3">Volunteer</th>
-                <th className="text-left text-sm font-medium text-[#6B6B6B] px-6 py-3">Skills</th>
-                <th className="text-left text-sm font-medium text-[#6B6B6B] px-6 py-3">Status</th>
-                <th className="text-left text-sm font-medium text-[#6B6B6B] px-6 py-3">Tasks</th>
-                <th className="text-left text-sm font-medium text-[#6B6B6B] px-6 py-3">Joined</th>
-                <th className="text-left text-sm font-medium text-[#6B6B6B] px-6 py-3"></th>
+                <th className="text-left text-xs font-medium text-white/50 tracking-wider px-6 py-3">VOLUNTEER</th>
+                <th className="text-left text-xs font-medium text-white/50 tracking-wider px-6 py-3">SKILLS</th>
+                <th className="text-left text-xs font-medium text-white/50 tracking-wider px-6 py-3">STATUS</th>
+                <th className="text-left text-xs font-medium text-white/50 tracking-wider px-6 py-3">TASKS</th>
+                <th className="text-left text-xs font-medium text-white/50 tracking-wider px-6 py-3">JOINED</th>
+                <th className="text-left text-xs font-medium text-white/50 tracking-wider px-6 py-3"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E5E5E5]">
+            <tbody className="divide-y divide-white/[0.06]">
               {filteredVolunteers.map((vol) => (
-                <tr key={vol.id} className="hover:bg-[#FAFAFA]">
+                <tr key={vol.id} className="hover:bg-white/[0.02]">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <Avatar name={vol.name} size="sm" />
                       <div>
-                        <p className="font-medium text-[#1A1A1A]">{vol.name}</p>
-                        <p className="text-sm text-[#6B6B6B]">{vol.email}</p>
+                        <p className="font-medium text-white">{vol.name}</p>
+                        <p className="text-sm text-white/50">{vol.email}</p>
                       </div>
                     </div>
                   </td>
@@ -126,25 +119,25 @@ export default function AdminVolunteerTable() {
                   <td className="px-6 py-4">
                     <Badge variant={vol.status}>{vol.status}</Badge>
                   </td>
-                  <td className="px-6 py-4 text-sm text-[#6B6B6B]">
+                  <td className="px-6 py-4 text-sm text-white/50">
                     {vol.tasksCompleted}
                   </td>
-                  <td className="px-6 py-4 text-sm text-[#6B6B6B]">
+                  <td className="px-6 py-4 text-sm text-white/50">
                     {vol.joinedAt}
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <button className="p-1.5 hover:bg-[#EDEDE9] rounded" title="Email">
-                        <Mail size={16} className="text-[#6B6B6B]" />
+                    <div className="flex items-center gap-1">
+                      <button className="p-1.5 hover:bg-white/10 rounded" title="Email">
+                        <Mail size={14} className="text-white/50" />
                       </button>
-                      <button className="p-1.5 hover:bg-[#EDEDE9] rounded" title="Call">
-                        <Phone size={16} className="text-[#6B6B6B]" />
+                      <button className="p-1.5 hover:bg-white/10 rounded" title="Call">
+                        <Phone size={14} className="text-white/50" />
                       </button>
-                      <button className="p-1.5 hover:bg-[#EDEDE9] rounded">
-                        <Edit size={16} className="text-[#6B6B6B]" />
+                      <button className="p-1.5 hover:bg-white/10 rounded">
+                        <Edit size={14} className="text-white/50" />
                       </button>
-                      <button className="p-1.5 hover:bg-[#EDEDE9] rounded">
-                        <Trash2 size={16} className="text-red-500" />
+                      <button className="p-1.5 hover:bg-white/10 rounded">
+                        <Trash2 size={14} className="text-red-400" />
                       </button>
                     </div>
                   </td>

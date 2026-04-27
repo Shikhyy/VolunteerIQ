@@ -11,14 +11,14 @@ const Avatar = ({
     xl: 'w-16 h-16 text-lg',
   }
 
-  const initials = name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?'
+  const initials = name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U'
 
   return (
     <div className={`${sizes[size]} rounded-full bg-[#D6CCC2] flex items-center justify-center overflow-hidden ${className}`}>
       {src ? (
         <img src={src} alt={name} className="w-full h-full object-cover" />
       ) : (
-        <span className="font-medium text-[#1A1A1A]">{initials}</span>
+        <span className="font-semibold text-[#0A0A0A]">{initials}</span>
       )}
     </div>
   )

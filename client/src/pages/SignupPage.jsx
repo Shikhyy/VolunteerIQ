@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, Check } from 'lucide-react'
+import { ArrowLeft, Check, Eye, EyeOff } from 'lucide-react'
 import { Button, Input } from '../components/ui'
 import { useAuthStore } from '../store/authStore'
 
@@ -10,8 +10,21 @@ export default function SignupPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [agreed, setAgreed] = useState(false)
+  const [textProgress, setTextProgress] = useState(0)
   const { signup } = useAuthStore()
   const navigate = useNavigate()
+
+  const fullText = "VolunteerIQ"
+
+  useEffect(() => {
+    let progress = 0
+    const interval = setInterval(() => {
+      progress += 1
+      setTextProgress(progress)
+      if (progress >= fullText.length) clearInterval(interval)
+    }, 60)
+    return () => clearInterval(interval)
+  }, [])
 
   const passwordRequirements = [
     { met: form.password.length >= 8, text: 'At least 8 characters' },
@@ -35,36 +48,42 @@ export default function SignupPage() {
     setLoading(true)
     try {
       await signup(form.email, form.password, form.name)
-      navigate('/onboarding')
-    } catch (err) {
-      setError('Failed to create account. Try a different email.')
+      navigate('/dashboard')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-12 h-12 bg-[#D6CCC2] rounded-xl flex items-center justify-center">
-            <span className="font-bold text-xl text-[#1A1A1A]">V</span>
-          </div>
-        </Link>
+    <div className="min-h-screen bg-[#0A0A0A] flex flex-col">
+      {/* Minimal Nav */}
+      <nav className="fixed top-0 left-0 right-0 z-50">
+        <div className="flex items-center justify-between px-6 py-5">
+          <Link to="/" className="flex items-center gap-2">
+            <span className="font-bold text-xl tracking-[0.2em]">
+              {fullText.slice(0, textProgress)}
+              <span className="inline-block w-2 h-5 bg-[#D6CCC2] ml-0.5 animate-pulse" />
+            </span>
+          </Link>
+          <Link to="/" className="text-sm tracking-[0.1em] text-white/50 hover:text-white transition-colors">
+            BACK
+          </Link>
+        </div>
+      </nav>
 
-        {/* Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-[#E5E5E5] p-8">
-          <h2 className="text-2xl font-bold text-[#1A1A1A] text-center mb-2">
-            Create your account
+      {/* Centered Form */}
+      <div className="flex-1 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md">
+          <h2 className="text-4xl font-bold text-center mb-2 tracking-tight">
+            Join<span className="text-[#D6CCC2]">.</span>
           </h2>
-          <p className="text-[#6B6B6B] text-center mb-8">
-            Start making a difference in your community
+          <p className="text-white/40 text-center mb-10 tracking-wide">
+            Start making a difference
           </p>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+              <p className="text-sm text-red-400">{error}</p>
             </div>
           )}
 
@@ -99,7 +118,7 @@ export default function SignupPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-9 text-[#9CA3AF] hover:text-[#6B6B6B]"
+                className="absolute right-3 top-9 text-white/30 hover:text-white"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -109,10 +128,10 @@ export default function SignupPage() {
               <div className="space-y-2">
                 {passwordRequirements.map((req, idx) => (
                   <div key={idx} className="flex items-center gap-2 text-sm">
-                    <div className={`w-4 h-4 rounded-full flex items-center justify-center ${req.met ? 'bg-green-500' : 'bg-[#E5E5E5]'}`}>
-                      {req.met && <Check size={10} className="text-white" />}
+                    <div className={`w-4 h-4 rounded-full flex items-center justify-center ${req.met ? 'bg-[#D6CCC2]' : 'bg-white/10'}`}>
+                      {req.met && <Check size={10} className="text-[#0A0A0A]" />}
                     </div>
-                    <span className={req.met ? 'text-[#1A1A1A]' : 'text-[#9CA3AF]'}>
+                    <span className={req.met ? 'text-white' : 'text-white/30'}>
                       {req.text}
                     </span>
                   </div>
@@ -125,33 +144,33 @@ export default function SignupPage() {
                 type="checkbox"
                 checked={agreed}
                 onChange={(e) => setAgreed(e.target.checked)}
-                className="mt-1 w-4 h-4 rounded border-[#E5E5E5] text-[#D6CCC2] focus:ring-[#D6CCC2]"
+                className="mt-1 w-4 h-4 rounded border-white/20 text-[#D6CCC2] focus:ring-[#D6CCC2] bg-[#0A0A0A]"
               />
-              <span className="text-sm text-[#6B6B6B]">
+              <span className="text-sm text-white/40">
                 I agree to the{' '}
-                <Link to="#" className="text-[#1A1A1A] underline">Terms of Service</Link>
+                <Link to="#" className="text-[#D6CCC2] hover:underline">Terms</Link>
                 {' '}and{' '}
-                <Link to="#" className="text-[#1A1A1A] underline">Privacy Policy</Link>
+                <Link to="#" className="text-[#D6CCC2] hover:underline">Privacy</Link>
               </span>
             </label>
 
             <Button 
               type="submit" 
-              variant="primary" 
-              className="w-full"
+              className="w-full bg-[#D6CCC2] text-[#0A0A0A] hover:bg-[#E3D5CA]"
               disabled={loading || !allMet}
+              loading={loading}
             >
-              {loading ? 'Creating account...' : 'Create Account'}
+              {loading ? 'CREATING...' : 'CREATE ACCOUNT'}
             </Button>
           </form>
-        </div>
 
-        <p className="mt-6 text-center text-[#6B6B6B]">
-          Already have an account?{' '}
-          <Link to="/login" className="text-[#1A1A1A] font-medium hover:underline">
-            Sign in
-          </Link>
-        </p>
+          <p className="mt-10 text-center text-white/40 text-sm tracking-wide">
+            Already have an account?{' '}
+            <Link to="/login" className="text-[#D6CCC2] hover:underline">
+              Sign in
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   )

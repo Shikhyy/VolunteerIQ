@@ -1,4 +1,4 @@
-import { forwardRef } from 'react'
+import { forwardRef, useState } from 'react'
 
 const Input = forwardRef(({ 
   label, 
@@ -9,7 +9,7 @@ const Input = forwardRef(({
   return (
     <div className={`space-y-1 ${className}`}>
       {label && (
-        <label className="block text-sm font-medium text-[#1A1A1A]">
+        <label className="block text-sm font-medium text-white/60 tracking-wide">
           {label}
         </label>
       )}
@@ -17,17 +17,17 @@ const Input = forwardRef(({
         ref={ref}
         className={`
           w-full h-12 px-4 py-2
-          bg-white border border-[#E5E5E5] rounded-lg
-          text-[#1A1A1A] placeholder-[#9CA3AF]
+          bg-white/[0.03] border border-white/[0.1] rounded-lg
+          text-white placeholder-white/30
           focus:outline-none focus:border-2 focus:border-[#D6CCC2]
           transition-colors
-          disabled:bg-[#F5F5F5] disabled:cursor-not-allowed
-          ${error ? 'border-red-500' : ''}
+          disabled:opacity-50 disabled:cursor-not-allowed
+          ${error ? 'border-red-500/50' : ''}
         `}
         {...props}
       />
       {error && (
-        <p className="text-sm text-red-500">{error}</p>
+        <p className="text-sm text-red-400">{error}</p>
       )}
     </div>
   )

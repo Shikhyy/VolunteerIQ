@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MapPin, Clock, Users, ChevronLeft } from 'lucide-react'
+import { MapPin, Clock, Users, ChevronLeft, Plus, X } from 'lucide-react'
 import { Card, Button, Input, Select, Textarea } from '../../components/ui'
+import { useTaskStore } from '../../store/taskStore'
 
 const categoryOptions = [
   { value: 'Medical', label: 'Medical' },
@@ -13,11 +14,11 @@ const categoryOptions = [
 ]
 
 const urgencyOptions = [
-  { value: 1, label: 'Low' },
-  { value: 2, label: 'Medium-Low' },
-  { value: 3, label: 'Medium' },
-  { value: 4, label: 'High' },
-  { value: 5, label: 'Critical' },
+  { value: 5, label: 'Critical - 5' },
+  { value: 4, label: 'High - 4' },
+  { value: 3, label: 'Medium - 3' },
+  { value: 2, label: 'Low - 2' },
+  { value: 1, label: 'Minimal - 1' },
 ]
 
 const skillOptions = [
@@ -26,19 +27,17 @@ const skillOptions = [
 
 export default function TaskCreate() {
   const navigate = useNavigate()
+  const { addTask } = useTaskStore()
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({
     title: '',
     description: '',
     category: '',
     urgency: 3,
-    address: '',
-    city: '',
-    district: '',
+    location: { address: '', city: '', district: '' },
     requiredSkills: [],
     slotsNeeded: 1,
-    deadlineDate: '',
-    deadlineTime: '',
+    deadline: '',
   })
 
   const toggleSkill = (skill) => {
@@ -55,33 +54,36 @@ export default function TaskCreate() {
       form.title &&
       form.description &&
       form.category &&
-      form.address &&
-      form.city &&
+      form.location.address &&
+      form.location.city &&
       form.requiredSkills.length > 0 &&
       form.slotsNeeded > 0 &&
-      form.deadlineDate &&
-      form.deadlineTime
+      form.deadline
     )
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 500))
+    addTask({
+      ...form,
+      status: 'open',
+      slotsFilled: 0,
+      priorityScore: (form.urgency / 5) * 0.4,
+    })
     navigate('/admin/tasks')
   }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      {/* Header */}
       <div className="flex items-center gap-4">
-        <button onClick={() => navigate(-1)} className="p-2 hover:bg-[#EDEDE9] rounded-lg">
+        <button onClick={() => navigate(-1)} className="p-2 hover:bg-white/5 rounded-lg">
           <ChevronLeft size={20} />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-[#1A1A1A]">Create New Task</h1>
-          <p className="text-[#6B6B6B]">Add a new volunteer opportunity</p>
+          <h1 className="text-2xl font-bold tracking-tight">Create Task<span className="text-[#D6CCC2]">.</span></h1>
+          <p className="text-white/50 mt-1">Add a new volunteer opportunity</p>
         </div>
       </div>
 
@@ -89,22 +91,20 @@ export default function TaskCreate() {
         <Card padding="lg" className="space-y-6">
           {/* Basic Info */}
           <div>
-            <h2 className="text-lg font-semibold text-[#1A1A1A] mb-4">Basic Information</h2>
+            <h2 className="text-sm font-medium tracking-wider text-white/60 mb-4">BASIC INFORMATION</h2>
             <div className="space-y-4">
               <Input
-                label="Task Title"
+                label="TASK TITLE"
                 placeholder="e.g., Medical camp setup — Okhla"
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
-                required
               />
               <Textarea
-                label="Description"
+                label="DESCRIPTION"
                 placeholder="Describe the task, requirements, and what volunteers will do..."
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 rows={4}
-                required
               />
             </div>
           </div>
@@ -112,45 +112,41 @@ export default function TaskCreate() {
           {/* Category & Urgency */}
           <div className="grid grid-cols-2 gap-4">
             <Select
-              label="Category"
+              label="CATEGORY"
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
               options={categoryOptions}
-              required
             />
             <Select
-              label="Urgency"
+              label="URGENCY"
               value={form.urgency}
               onChange={(e) => setForm({ ...form, urgency: parseInt(e.target.value) })}
               options={urgencyOptions}
-              required
             />
           </div>
 
           {/* Location */}
           <div>
-            <h2 className="text-lg font-semibold text-[#1A1A1A] mb-4">Location</h2>
+            <h2 className="text-sm font-medium tracking-wider text-white/60 mb-4">LOCATION</h2>
             <div className="space-y-4">
               <Input
-                label="Address"
+                label="ADDRESS"
                 placeholder="Full address"
-                value={form.address}
-                onChange={(e) => setForm({ ...form, address: e.target.value })}
-                required
+                value={form.location.address}
+                onChange={(e) => setForm({ ...form, location: { ...form.location, address: e.target.value } })}
               />
               <div className="grid grid-cols-2 gap-4">
                 <Input
-                  label="City"
+                  label="CITY"
                   placeholder="Delhi"
-                  value={form.city}
-                  onChange={(e) => setForm({ ...form, city: e.target.value })}
-                  required
+                  value={form.location.city}
+                  onChange={(e) => setForm({ ...form, location: { ...form.location, city: e.target.value } })}
                 />
                 <Input
-                  label="District / Area"
+                  label="DISTRICT / AREA"
                   placeholder="South Delhi"
-                  value={form.district}
-                  onChange={(e) => setForm({ ...form, district: e.target.value })}
+                  value={form.location.district}
+                  onChange={(e) => setForm({ ...form, location: { ...form.location, district: e.target.value } })}
                 />
               </div>
             </div>
@@ -158,8 +154,8 @@ export default function TaskCreate() {
 
           {/* Skills */}
           <div>
-            <h2 className="text-lg font-semibold text-[#1A1A1A] mb-4">Required Skills</h2>
-            <p className="text-sm text-[#6B6B6B] mb-3">Select skills needed for this task:</p>
+            <h2 className="text-sm font-medium tracking-wider text-white/60 mb-4">REQUIRED SKILLS</h2>
+            <p className="text-xs text-white/40 mb-3">Select skills needed for this task:</p>
             <div className="flex flex-wrap gap-2">
               {skillOptions.map((skill) => (
                 <button
@@ -167,10 +163,10 @@ export default function TaskCreate() {
                   type="button"
                   onClick={() => toggleSkill(skill)}
                   className={`
-                    px-4 py-2 rounded-full text-sm font-medium transition-colors
+                    px-4 py-2 rounded-full text-xs font-medium transition-all
                     ${form.requiredSkills.includes(skill)
-                      ? 'bg-[#D6CCC2] text-[#1A1A1A]'
-                      : 'bg-[#F5F5F5] text-[#6B6B6B] hover:bg-[#EDEDE9]'
+                      ? 'bg-[#D6CCC2] text-[#0A0A0A]'
+                      : 'bg-white/[0.05] text-white/60 hover:bg-white/[0.1]'
                     }
                   `}
                 >
@@ -183,38 +179,27 @@ export default function TaskCreate() {
           {/* Slots & Deadline */}
           <div className="grid grid-cols-2 gap-4">
             <Input
-              label="Volunteers Needed"
+              label="VOLUNTEERS NEEDED"
               type="number"
               min="1"
               value={form.slotsNeeded}
               onChange={(e) => setForm({ ...form, slotsNeeded: parseInt(e.target.value) })}
-              required
             />
-            <div className="grid grid-cols-2 gap-2">
-              <Input
-                label="Deadline Date"
-                type="date"
-                value={form.deadlineDate}
-                onChange={(e) => setForm({ ...form, deadlineDate: e.target.value })}
-                required
-              />
-              <Input
-                label="Deadline Time"
-                type="time"
-                value={form.deadlineTime}
-                onChange={(e) => setForm({ ...form, deadlineTime: e.target.value })}
-                required
-              />
-            </div>
+            <Input
+              label="DEADLINE"
+              type="date"
+              value={form.deadline}
+              onChange={(e) => setForm({ ...form, deadline: e.target.value })}
+            />
           </div>
 
           {/* Submit */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-[#E5E5E5]">
+          <div className="flex justify-end gap-3 pt-4 border-t border-white/[0.06]">
             <Button type="button" variant="ghost" onClick={() => navigate(-1)}>
-              Cancel
+              CANCEL
             </Button>
-            <Button type="submit" variant="primary" disabled={!canSubmit() || loading}>
-              {loading ? 'Creating...' : 'Create Task'}
+            <Button type="submit" disabled={!canSubmit() || loading} className="bg-[#D6CCC2] text-[#0A0A0A]">
+              {loading ? 'CREATING...' : 'CREATE TASK'}
             </Button>
           </div>
         </Card>

@@ -1,126 +1,105 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Clock, Users, TrendingUp, CheckCircle, ArrowRight } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { 
+  Clock, Users, TrendingUp, CheckCircle, ArrowRight, MapPin, 
+  Plus, Bell, Search, Settings, LogOut, ChevronRight,
+  Heart, Target, Star, Award, Calendar, Activity
+} from 'lucide-react'
 import { Card, Badge, Button } from '../../components/ui'
+import { useTaskStore } from '../../store/taskStore'
+import { useVolunteerStore } from '../../store/volunteerStore'
 
-const statsData = [
-  { label: 'Active Tasks', value: 12, change: '+12%', icon: Clock, color: 'bg-[#D6CCC2]' },
-  { label: 'Tasks Completed', value: 8, change: '+24%', icon: CheckCircle, color: 'bg-[#D6CCC2]' },
-  { label: 'Hours Volunteered', value: 24, change: '+8%', icon: TrendingUp, color: 'bg-[#D6CCC2]' },
-  { label: 'Team Members', value: 5, change: '+2', icon: Users, color: 'bg-[#D6CCC2]' },
-]
-
-const mockTasks = [
-  {
-    id: 1,
-    title: 'Medical camp setup — Okhla',
-    category: 'Medical',
-    urgency: 'critical',
-    location: 'Okhla, Delhi',
-    deadline: 'Today, 6:00 PM',
-    slotsFilled: 5,
-    slotsNeeded: 8,
-    status: 'in_progress',
-  },
-  {
-    id: 2,
-    title: 'Food distribution — Rohini',
-    category: 'Logistics',
-    urgency: 'high',
-    location: 'Rohini, Delhi',
-    deadline: 'Tomorrow, 10:00 AM',
-    slotsFilled: 3,
-    slotsNeeded: 6,
-    status: 'open',
-  },
-  {
-    id: 3,
-    title: 'Teaching support — Dwarka',
-    category: 'Teaching',
-    urgency: 'medium',
-    location: 'Dwarka, Delhi',
-    deadline: 'Mar 1, 9:00 AM',
-    slotsFilled: 2,
-    slotsNeeded: 4,
-    status: 'open',
-  },
-]
+const urgencyVariant = {
+  5: 'critical',
+  4: 'high', 
+  3: 'medium',
+  2: 'low',
+  1: 'low',
+}
 
 export default function VolunteerDashboard() {
+  const { tasks, myTasks } = useTaskStore()
+  const { myProfile } = useVolunteerStore()
   const [activeTab, setActiveTab] = useState('active')
 
-  const tabs = [
-    { id: 'active', label: 'Active (3)' },
-    { id: 'pending', label: 'Pending (0)' },
-    { id: 'completed', label: 'Completed (8)' },
+  const statsData = [
+    { label: 'MY TASKS', value: myTasks.length, icon: CheckCircle, color: 'text-[#D6CCC2]' },
+    { label: 'COMPLETED', value: myProfile?.tasksCompleted || 0, icon: Award, color: 'text-[#D5BDAF]' },
+    { label: 'HOURS', value: 24, icon: Clock, color: 'text-[#E3D5CA]' },
+    { label: 'TEAM', value: 5, icon: Users, color: 'text-white/60' },
   ]
 
-  const filterTasks = () => {
-    switch (activeTab) {
-      case 'active': return mockTasks.filter(t => t.status === 'in_progress')
-      case 'pending': return []
-      case 'completed': return mockTasks.filter(t => t.status === 'completed')
-      default: return mockTasks
-    }
-  }
-
-  const tasks = filterTasks()
+  const tabs = [
+    { id: 'active', label: 'ACTIVE' },
+    { id: 'pending', label: 'PENDING' },
+    { id: 'completed', label: 'COMPLETED' },
+  ]
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-[#1A1A1A]">Welcome back!</h1>
-        <p className="text-[#6B6B6B]">Here's what's happening with your volunteer work.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Welcome back<span className="text-[#D6CCC2]">.</span>
+          </h1>
+          <p className="text-white/40 mt-1 tracking-wide">
+            Here's what's happening with your volunteer work
+          </p>
+        </div>
+        <Link to="/tasks">
+          <Button className="bg-[#D6CCC2] text-[#0A0A0A] hover:bg-[#E3D5CA] gap-2">
+            <Plus size={18} /> FIND TASKS
+          </Button>
+        </Link>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/[0.06]">
         {statsData.map((stat, idx) => {
           const Icon = stat.icon
           return (
-            <Card key={idx} className="p-4">
-              <div className="flex items-start justify-between">
-                <div className={`w-10 h-10 ${stat.color} rounded-lg flex items-center justify-center`}>
-                  <Icon size={20} className="text-[#1A1A1A]" />
-                </div>
-                <span className="text-xs text-green-600 font-medium">{stat.change}</span>
-              </div>
-              <p className="text-2xl font-bold text-[#1A1A1A] mt-3">{stat.value}</p>
-              <p className="text-sm text-[#6B6B6B]">{stat.label}</p>
-            </Card>
+            <div key={idx} className="group p-6 bg-[#0A0A0A] hover:bg-[#111] transition-all duration-500">
+              <Icon size={20} className={`${stat.color} mb-4`} />
+              <p className="text-3xl font-bold tracking-tight">{stat.value}</p>
+              <p className="text-xs tracking-[0.15em] text-white/40 mt-1">{stat.label}</p>
+            </div>
           )
         })}
       </div>
 
       {/* Quick Actions */}
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-3">
         <Link to="/tasks">
-          <Button variant="secondary" size="sm">
-            <Clock size={16} className="mr-2" />
-            Browse Tasks
+          <Button variant="ghost" className="text-white/60 hover:text-white gap-2">
+            <Search size={16} /> BROWSE TASKS
           </Button>
         </Link>
         <Link to="/map">
-          <Button variant="secondary" size="sm">
-            View Map
+          <Button variant="ghost" className="text-white/60 hover:text-white gap-2">
+            <MapPin size={16} /> VIEW MAP
+          </Button>
+        </Link>
+        <Link to="/profile">
+          <Button variant="ghost" className="text-white/60 hover:text-white gap-2">
+            <Settings size={16} /> PROFILE
           </Button>
         </Link>
       </div>
 
-      {/* Tasks */}
-      <Card padding="none">
-        <div className="border-b border-[#E5E5E5]">
-          <div className="flex gap-6 px-6 pt-4">
+      {/* Tasks Section */}
+      <Card padding="none" className="overflow-hidden">
+        <div className="border-b border-white/[0.06]">
+          <div className="flex gap-6 px-6 pt-4 overflow-x-auto">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`
-                  pb-3 text-sm font-medium border-b-2 transition-colors
+                  pb-4 text-sm font-medium tracking-[0.1em] border-b-2 whitespace-nowrap transition-colors
                   ${activeTab === tab.id
-                    ? 'border-[#D6CCC2] text-[#1A1A1A]'
-                    : 'border-transparent text-[#6B6B6B] hover:text-[#1A1A1A]'
+                    ? 'border-[#D6CCC2] text-white'
+                    : 'border-transparent text-white/40 hover:text-white'
                   }
                 `}
               >
@@ -131,44 +110,70 @@ export default function VolunteerDashboard() {
         </div>
 
         <div className="p-6">
-          {tasks.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-[#6B6B6B]">No tasks found</p>
+          {myTasks.length === 0 ? (
+            <div className="text-center py-16">
+              <Target size={40} className="text-white/20 mx-auto mb-4" />
+              <p className="text-white/40 mb-4 tracking-wide">No active tasks</p>
               <Link to="/tasks">
-                <Button variant="ghost" size="sm" className="mt-2">
-                  Browse available tasks <ArrowRight size={16} className="ml-1" />
+                <Button variant="ghost" className="text-[#D6CCC2] gap-2">
+                  Browse available tasks <ArrowRight size={16} />
                 </Button>
               </Link>
             </div>
           ) : (
             <div className="space-y-4">
-              {tasks.map((task) => (
+              {myTasks.map((task) => (
                 <div
                   key={task.id}
-                  className="p-4 bg-[#FAFAFA] rounded-lg hover:bg-[#EDEDE9] transition-colors"
+                  className="group p-5 bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.06] hover:border-white/[0.1] rounded-xl transition-all"
                 >
-                  <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-start justify-between mb-3">
                     <div className="flex gap-2">
-                      <Badge variant={task.urgency}>{task.urgency}</Badge>
-                      <Badge>{task.category}</Badge>
+                      <Badge variant={urgencyVariant[task.urgency]} className="text-[10px] tracking-wider">
+                        {urgencyVariant[task.urgency].toUpperCase()}
+                      </Badge>
+                      <Badge className="text-[10px] tracking-wider">{task.category}</Badge>
                     </div>
-                    <span className="text-sm text-[#9CA3AF]">{task.deadline}</span>
+                    <span className="text-xs text-white/30">
+                      {new Date(task.deadline).toLocaleDateString()}
+                    </span>
                   </div>
-                  <h3 className="font-medium text-[#1A1A1A] mb-1">{task.title}</h3>
-                  <p className="text-sm text-[#6B6B6B] mb-3">{task.location}</p>
-                  <div className="flex items-center justify-between">
+                  
+                  <h3 className="text-lg font-semibold mb-2 tracking-wide">
+                    {task.title}
+                  </h3>
+                  <p className="text-sm text-white/50 mb-4 line-clamp-2">
+                    {task.description}
+                  </p>
+                  
+                  <div className="flex flex-wrap gap-4 text-xs text-white/40 mb-4">
+                    <div className="flex items-center gap-1">
+                      <MapPin size={12} />
+                      {task.location?.city}, {task.location?.district}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Users size={12} />
+                      {task.slotsFilled}/{task.slotsNeeded} volunteers
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between pt-4 border-t border-white/[0.06]">
                     <div className="flex items-center gap-2">
-                      <div className="w-24 h-1.5 bg-[#E5E5E5] rounded-full overflow-hidden">
+                      <div className="w-32 h-1.5 bg-white/[0.1] rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-[#D6CCC2] rounded-full"
+                          className="h-full bg-[#D6CCC2] rounded-full transition-all"
                           style={{ width: `${(task.slotsFilled / task.slotsNeeded) * 100}%` }}
                         />
                       </div>
-                      <span className="text-sm text-[#6B6B6B]">
-                        {task.slotsFilled}/{task.slotsNeeded} volunteers
+                      <span className="text-xs text-white/40">
+                        {Math.round((task.slotsFilled / task.slotsNeeded) * 100)}% filled
                       </span>
                     </div>
-                    <Button variant="ghost" size="sm">View</Button>
+                    <Link to={`/tasks/${task.id}`}>
+                      <Button variant="ghost" size="sm" className="text-white/60 hover:text-white gap-1">
+                        VIEW <ChevronRight size={14} />
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               ))}
@@ -176,6 +181,40 @@ export default function VolunteerDashboard() {
           )}
         </div>
       </Card>
+
+      {/* Recommended Tasks */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold tracking-wide">RECOMMENDED FOR YOU</h2>
+          <Link to="/tasks" className="text-sm text-[#D6CCC2] hover:underline">
+            View all
+          </Link>
+        </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {tasks.slice(0, 3).map((task) => (
+            <Link key={task.id} to={`/tasks/${task.id}`}>
+              <div className="group p-5 bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.06] hover:border-white/[0.1] rounded-xl transition-all h-full">
+                <div className="flex gap-2 mb-3">
+                  <Badge variant={urgencyVariant[task.urgency]} className="text-[10px]">
+                    {urgencyVariant[task.urgency]}
+                  </Badge>
+                  <Badge className="text-[10px]">{task.category}</Badge>
+                </div>
+                <h3 className="font-semibold mb-2 group-hover:text-[#D6CCC2] transition-colors">
+                  {task.title}
+                </h3>
+                <p className="text-sm text-white/40 line-clamp-2 mb-3">
+                  {task.description}
+                </p>
+                <div className="flex items-center gap-1 text-xs text-white/30">
+                  <MapPin size={12} />
+                  {task.location?.city}
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }

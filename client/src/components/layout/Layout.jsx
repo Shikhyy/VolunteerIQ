@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { 
   Home, Users, Map, BarChart3, FileText, Upload, 
-  Settings, LogOut, Menu, X, Search, Bell, ChevronLeft
+  Settings, LogOut, Menu, X, Search, Bell, Plus, ChevronLeft, Menu as MenuIcon
 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import Avatar from '../ui/Avatar'
@@ -18,15 +18,23 @@ const navItems = [
 ]
 
 export default function Layout({ children }) {
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
-  const { user, logout } = useAuthStore()
+  const { user, role, logout } = useAuthStore()
 
-  const role = 'volunteer' 
+  const currentRole = role || 'volunteer'
+  const filteredNav = navItems.filter(item => item.roles.includes(currentRole))
 
-  const filteredNav = navItems.filter(item => item.roles.includes(role))
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const handleLogout = async () => {
     await logout()
@@ -34,116 +42,122 @@ export default function Layout({ children }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
-      {/* Topbar */}
-      <header className="fixed top-0 left-0 right-0 h-14 bg-white border-b border-[#E5E5E5] z-50 flex items-center justify-between px-4">
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden p-2 hover:bg-[#EDEDE9] rounded-lg"
-          >
-            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-          <Link to="/dashboard" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-[#D6CCC2] rounded-lg flex items-center justify-center">
-              <span className="font-bold text-sm text-[#1A1A1A]">V</span>
-            </div>
-            <span className="font-semibold text-[#1A1A1A] hidden sm:block">VolunteerIQ</span>
-          </Link>
-        </div>
-
-        <div className="flex-1 max-w-md mx-4 hidden md:block">
-          <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]" />
-            <input 
-              type="text" 
-              placeholder="Search tasks, volunteers..."
-              className="w-full h-9 pl-9 pr-4 bg-[#F5F5F5] border-0 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#D6CCC2]"
-            />
+    <div className="min-h-screen bg-[#0A0A0A]">
+      {/* Minimal Topbar */}
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled ? 'bg-[#0A0A0A]/90 backdrop-blur-md border-b border-white/[0.06]' : ''
+      }`}>
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="lg:hidden p-2 hover:bg-white/5 rounded-lg transition-colors"
+            >
+              <MenuIcon size={20} />
+            </button>
+            <Link to="/dashboard" className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-[#D6CCC2] rounded-full flex items-center justify-center">
+                <span className="font-bold text-sm text-[#0A0A0A]">V</span>
+              </div>
+              <span className="font-semibold text-white tracking-[0.1em] hidden sm:block">VolunteerIQ</span>
+            </Link>
           </div>
-        </div>
 
-        <div className="flex items-center gap-2">
-          <button className="p-2 hover:bg-[#EDEDE9] rounded-lg relative">
-            <Bell size={20} className="text-[#6B6B6B]" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-          </button>
-          <Link to="/profile" className="flex items-center gap-2 p-1 hover:bg-[#EDEDE9] rounded-lg">
-            <Avatar name={user?.displayName || user?.email || 'User'} size="sm" />
-          </Link>
+          {/* Search (Desktop) */}
+          <div className="hidden md:flex flex-1 max-w-md mx-8">
+            <div className="relative w-full">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+              <input 
+                type="text" 
+                placeholder="SEARCH..."
+                className="w-full h-9 pl-9 pr-4 bg-white/[0.03] border border-white/[0.06] rounded-lg text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#D6CCC2]/50 uppercase tracking-wider"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Link to="/tasks/create" className="hidden sm:flex">
+              <button className="p-2 bg-[#D6CCC2] text-[#0A0A0A] rounded-lg hover:bg-[#E3D5CA] transition-colors">
+                <Plus size={18} />
+              </button>
+            </Link>
+            <button className="p-2 hover:bg-white/5 rounded-lg transition-colors relative">
+              <Bell size={18} className="text-white/60" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#D6CCC2] rounded-full"></span>
+            </button>
+            <Link to="/profile" className="flex items-center gap-2 p-1.5 hover:bg-white/5 rounded-lg transition-colors">
+              <Avatar name={user?.displayName || 'User'} size="sm" />
+            </Link>
+          </div>
         </div>
       </header>
 
       {/* Sidebar */}
       <aside className={`
-        fixed left-0 top-14 bottom-0 bg-white border-r border-[#E5E5E5] 
-        transition-all duration-300 z-40
-        ${sidebarOpen ? 'w-60' : 'w-16'}
+        fixed left-0 top-[56px] bottom-0 w-16 lg:w-56 bg-[#0A0A0A] border-r border-white/[0.06]
+        transition-all duration-300 z-40 flex flex-col
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-        lg:translate-x-0
       `}>
-        <div className="flex flex-col h-full">
-          {/* Toggle */}
-          <button 
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="hidden lg:flex p-3 hover:bg-[#EDEDE9] justify-end"
+        {/* Toggle */}
+        <button 
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          className="hidden lg:flex p-3 hover:bg-white/5 justify-end"
+        >
+          <ChevronLeft size={16} className={`text-white/30 transition-transform ${sidebarCollapsed ? 'rotate-180' : ''}`} />
+        </button>
+
+        {/* Nav Items */}
+        <nav className="flex-1 px-2 space-y-1">
+          {filteredNav.map((item) => {
+            const Icon = item.icon
+            const isActive = location.pathname === item.path
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={() => setMobileOpen(false)}
+                className={`
+                  flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
+                  ${isActive 
+                    ? 'bg-white/[0.06] text-[#D6CCC2]' 
+                    : 'text-white/50 hover:text-white hover:bg-white/[0.03]'
+                  }
+                  ${sidebarCollapsed ? 'justify-center' : ''}
+                `}
+              >
+                <Icon size={18} />
+                <span className={`text-sm tracking-wide ${sidebarCollapsed ? 'hidden lg:block' : 'block'} whitespace-nowrap`}>
+                  {item.label}
+                </span>
+              </Link>
+            )
+          })}
+        </nav>
+
+        {/* Bottom Actions */}
+        <div className="p-2 border-t border-white/[0.06] space-y-1">
+          <Link
+            to="/profile"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/50 hover:text-white hover:bg-white/[0.03] transition-colors"
           >
-            <ChevronLeft size={18} className={`text-[#6B6B6B] transition-transform ${!sidebarOpen ? 'rotate-180' : ''}`} />
+            <Settings size={18} />
+            <span className={`text-sm tracking-wide ${sidebarCollapsed ? 'hidden lg:block' : 'block'}`}>
+              Settings
+            </span>
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/50 hover:text-white hover:bg-white/[0.03] transition-colors"
+          >
+            <LogOut size={18} />
+            <span className={`text-sm tracking-wide ${sidebarCollapsed ? 'hidden lg:block' : 'block'}`}>
+              Logout
+            </span>
           </button>
-
-          {/* Nav */}
-          <nav className="flex-1 px-2 space-y-1">
-            {filteredNav.map((item) => {
-              const Icon = item.icon
-              const isActive = location.pathname === item.path
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setMobileOpen(false)}
-                  className={`
-                    flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors
-                    ${isActive 
-                      ? 'bg-[#EDEDE9] text-[#1A1A1A] font-medium' 
-                      : 'text-[#6B6B6B] hover:bg-[#F5F5F5] hover:text-[#1A1A1A]'
-                    }
-                    ${!sidebarOpen ? 'justify-center' : ''}
-                  `}
-                >
-                  <Icon size={20} />
-                  {sidebarOpen && <span>{item.label}</span>}
-                </Link>
-              )
-            })}
-          </nav>
-
-          {/* Bottom actions */}
-          <div className="p-2 border-t border-[#E5E5E5] space-y-1">
-            <Link
-              to="/profile"
-              className={`
-                flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#6B6B6B] hover:bg-[#F5F5F5] hover:text-[#1A1A1A]
-                ${!sidebarOpen ? 'justify-center' : ''}
-              `}
-            >
-              <Settings size={20} />
-              {sidebarOpen && <span>Settings</span>}
-            </Link>
-            <button
-              onClick={handleLogout}
-              className={`
-                w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#6B6B6B] hover:bg-[#F5F5F5] hover:text-[#1A1A1A]
-                ${!sidebarOpen ? 'justify-center' : ''}
-              `}
-            >
-              <LogOut size={20} />
-              {sidebarOpen && <span>Logout</span>}
-            </button>
-          </div>
         </div>
       </aside>
 
-      {/* Mobile overlay */}
+      {/* Mobile Overlay */}
       {mobileOpen && (
         <div 
           className="fixed inset-0 bg-black/50 z-30 lg:hidden"
@@ -151,12 +165,12 @@ export default function Layout({ children }) {
         />
       )}
 
-      {/* Main content */}
+      {/* Main Content */}
       <main className={`
-        pt-14 min-h-screen transition-all duration-300
-        ${sidebarOpen ? 'lg:ml-60' : 'lg:ml-16'}
+        pt-[56px] min-h-screen transition-all duration-300
+        ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-56'}
       `}>
-        <div className="p-6">
+        <div className="p-4 sm:p-6 lg:p-8">
           {children}
         </div>
       </main>

@@ -1,7 +1,7 @@
 const Card = ({ children, className = '', padding = 'lg', hover, onClick }) => {
   const paddingClasses = {
     sm: 'p-4',
-    md: 'p-6',
+    md: 'p-5',
     lg: 'p-6',
     none: 'p-0',
   }
@@ -9,9 +9,9 @@ const Card = ({ children, className = '', padding = 'lg', hover, onClick }) => {
   return (
     <div 
       className={`
-        bg-white rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.05)]
+        bg-[#111] rounded-xl border border-white/[0.06]
         ${paddingClasses[padding]}
-        ${hover ? 'hover:shadow-md transition-shadow cursor-pointer' : ''}
+        ${hover ? 'hover:border-white/[0.12] transition-all duration-300 cursor-pointer' : ''}
         ${onClick ? 'cursor-pointer' : ''}
         ${className}
       `}
