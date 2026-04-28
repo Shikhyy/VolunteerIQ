@@ -165,8 +165,12 @@ export default function Layout({ children }) {
         {/* Bottom Actions */}
         <div className="p-2 border-t border-white/[0.06] space-y-1">
           <Link
-            to="/profile"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/50 hover:text-white hover:bg-white/[0.03] transition-colors"
+            to="/settings"
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+              location.pathname === '/settings'
+                ? 'bg-white/[0.06] text-[#D6CCC2]'
+                : 'text-white/50 hover:text-white hover:bg-white/[0.03]'
+            }`}
           >
             <Settings size={18} />
             <span className={`text-sm tracking-wide ${sidebarCollapsed ? 'hidden lg:block' : 'block'}`}>
