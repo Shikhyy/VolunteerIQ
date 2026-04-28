@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { useAuthStore } from './store/authStore'
 import { useEffect, lazy, Suspense } from 'react'
 import { ToastProvider } from './contexts/ToastContext'
@@ -22,7 +22,7 @@ import HelpPage from './pages/HelpPage'
 import SettingsPage from './pages/SettingsPage'
 import Notifications from './pages/notifications/Notifications'
 
-// Lazy loaded admin pages
+// Lazy loaded pages
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
 const AdminTaskManager = lazy(() => import('./pages/admin/AdminTaskManager'))
 const AdminVolunteerTable = lazy(() => import('./pages/admin/AdminVolunteerTable'))
@@ -39,7 +39,7 @@ const PageLoader = () => (
 
 function AppContent() {
   const { user, loading, initAuth } = useAuthStore()
-  const navigate = useNavigateFromHook()
+  const navigate = useNavigate()
 
   useEffect(() => {
     initAuth()
@@ -49,10 +49,10 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA]">
+      <div className="min-h-screen flex items-center justify-center bg-[#0A0A0A]">
         <div className="animate-pulse flex flex-col items-center gap-3">
           <div className="w-12 h-12 bg-[#D6CCC2] rounded-xl flex items-center justify-center">
-            <span className="text-xl font-bold text-[#1A1A1A]">V</span>
+            <span className="text-xl font-bold text-[#0A0A0A]">V</span>
           </div>
         </div>
       </div>
@@ -64,72 +64,67 @@ function AppContent() {
 
   return (
     <Routes>
-        {/* Public routes */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" /> : <LoginPage />} />
-        <Route path="/signup" element={isAuthenticated ? <Navigate to="/dashboard" /> : <SignupPage />} />
+      {/* Public routes */}
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" /> : <LoginPage />} />
+      <Route path="/signup" element={isAuthenticated ? <Navigate to="/dashboard" /> : <SignupPage />} />
+      <Route path="/help" element={<HelpPage />} />
 
-        {/* Protected routes with Layout */}
-        <Route path="/onboarding" element={
-          isAuthenticated ? <Layout><OnboardingPage /></Layout> : <Navigate to="/login" />
-        } />
-        <Route path="/dashboard" element={
-          isAuthenticated ? <Layout><VolunteerDashboard /></Layout> : <Navigate to="/login" />
-        } />
-        <Route path="/tasks" element={
-          isAuthenticated ? <Layout><TaskBrowser /></Layout> : <Navigate to="/login" />
-        } />
-        <Route path="/tasks/create" element={
-          isAuthenticated ? <Layout><TaskCreate /></Layout> : <Navigate to="/login" />
-        } />
-        <Route path="/tasks/:id" element={
-          isAuthenticated ? <Layout><TaskDetail /></Layout> : <Navigate to="/login" />
-        } />
-        <Route path="/map" element={
-          isAuthenticated ? <Layout><Suspense fallback={<PageLoader />}><MapView /></Suspense></Layout> : <Navigate to="/login" />
-        } />
-        <Route path="/admin" element={
-          isAuthenticated && isAdmin ? <Layout><Suspense fallback={<PageLoader />}><AdminDashboard /></Suspense></Layout> : 
-          isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
-        } />
-        <Route path="/admin/tasks" element={
-          isAuthenticated && isAdmin ? <Layout><Suspense fallback={<PageLoader />}><AdminTaskManager /></Suspense></Layout> : 
-          isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
-        } />
-        <Route path="/admin/volunteers" element={
-          isAuthenticated && isAdmin ? <Layout><Suspense fallback={<PageLoader />}><AdminVolunteerTable /></Suspense></Layout> : 
-          isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
-        } />
-        <Route path="/admin/import" element={
-          isAuthenticated && isAdmin ? <Layout><Suspense fallback={<PageLoader />}><CSVImportPage /></Suspense></Layout> : 
-          isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
-        } />
-        <Route path="/admin/analytics" element={
-          isAuthenticated && isAdmin ? <Layout><Suspense fallback={<PageLoader />}><AnalyticsDashboard /></Suspense></Layout> : 
-          isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
-        } />
-        <Route path="/profile" element={
-          isAuthenticated ? <Layout><ProfilePage /></Layout> : <Navigate to="/login" />
-        } />
-        <Route path="/notifications" element={
-          isAuthenticated ? <Layout><Notifications /></Layout> : <Navigate to="/login" />
-        } />
-        <Route path="/settings" element={
-          isAuthenticated ? <Layout><SettingsPage /></Layout> : <Navigate to="/login" />
-        } />
-        <Route path="/help" element={
-          isAuthenticated ? <Layout><HelpPage /></Layout> : <Navigate to="/login" />
-        } />
-        <Route path="/stats" element={
-          isAuthenticated ? <Layout><Suspense fallback={<PageLoader />}><VolunteerStats /></Suspense></Layout> : <Navigate to="/login" />
-        } />
-      </Routes>
+      {/* Protected routes with Layout */}
+      <Route path="/onboarding" element={
+        isAuthenticated ? <Layout><OnboardingPage /></Layout> : <Navigate to="/login" />
+      } />
+      <Route path="/dashboard" element={
+        isAuthenticated ? <Layout><VolunteerDashboard /></Layout> : <Navigate to="/login" />
+      } />
+      <Route path="/tasks" element={
+        isAuthenticated ? <Layout><TaskBrowser /></Layout> : <Navigate to="/login" />
+      } />
+      <Route path="/tasks/create" element={
+        isAuthenticated ? <Layout><TaskCreate /></Layout> : <Navigate to="/login" />
+      } />
+      <Route path="/tasks/:id" element={
+        isAuthenticated ? <Layout><TaskDetail /></Layout> : <Navigate to="/login" />
+      } />
+      <Route path="/map" element={
+        isAuthenticated ? <Layout><Suspense fallback={<PageLoader />}><MapView /></Suspense></Layout> : <Navigate to="/login" />
+      } />
+      <Route path="/stats" element={
+        isAuthenticated ? <Layout><Suspense fallback={<PageLoader />}><VolunteerStats /></Suspense></Layout> : <Navigate to="/login" />
+      } />
+      <Route path="/profile" element={
+        isAuthenticated ? <Layout><ProfilePage /></Layout> : <Navigate to="/login" />
+      } />
+      <Route path="/notifications" element={
+        isAuthenticated ? <Layout><Notifications /></Layout> : <Navigate to="/login" />
+      } />
+      <Route path="/settings" element={
+        isAuthenticated ? <Layout><SettingsPage /></Layout> : <Navigate to="/login" />
+      } />
+
+      {/* Admin routes */}
+      <Route path="/admin" element={
+        isAuthenticated && isAdmin ? <Layout><Suspense fallback={<PageLoader />}><AdminDashboard /></Suspense></Layout> : 
+        isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
+      } />
+      <Route path="/admin/tasks" element={
+        isAuthenticated && isAdmin ? <Layout><Suspense fallback={<PageLoader />}><AdminTaskManager /></Suspense></Layout> : 
+        isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
+      } />
+      <Route path="/admin/volunteers" element={
+        isAuthenticated && isAdmin ? <Layout><Suspense fallback={<PageLoader />}><AdminVolunteerTable /></Suspense></Layout> : 
+        isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
+      } />
+      <Route path="/admin/import" element={
+        isAuthenticated && isAdmin ? <Layout><Suspense fallback={<PageLoader />}><CSVImportPage /></Suspense></Layout> : 
+        isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
+      } />
+      <Route path="/admin/analytics" element={
+        isAuthenticated && isAdmin ? <Layout><Suspense fallback={<PageLoader />}><AnalyticsDashboard /></Suspense></Layout> : 
+        isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
+      } />
+    </Routes>
   )
-}
-
-function useNavigateFromHook() {
-  const { useNavigate } = require('react-router-dom')
-  return useNavigate()
 }
 
 export default function App() {
