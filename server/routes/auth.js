@@ -5,6 +5,9 @@ const { createClient } = require('@supabase/supabase-js')
 const supabaseUrl = process.env.SUPABASE_URL
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: { autoRefreshToken: false, persistSession: false }
+})
 
 router.post('/login', async (req, res) => {
   const { email, password } = req.body
@@ -57,20 +60,18 @@ router.post('/register', async (req, res) => {
   }
 
   try {
-    const { data, error } = await supabase.auth.signUp({
+    // Use admin API to create user without email confirmation
+    const { data: user, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
-      options: {
-        data: { full_name: name }
-      }
+      email_confirm: true,
+      user_metadata: { full_name: name }
     })
 
-    if (error) {
-      console.error('Supabase signup error:', error)
-      return res.status(400).json({ error: error.message })
+    if (createError) {
+      console.error('Supabase signup error:', createError)
+      return res.status(400).json({ error: createError.message })
     }
-
-    const { user, session } = data
 
     // Create profile
     if (user) {
@@ -82,8 +83,14 @@ router.post('/register', async (req, res) => {
       })
     }
 
+    // Generate a token for the user (admin API doesn't return session)
+    const { data: sessionData } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    })
+
     res.status(201).json({
-      token: session?.access_token,
+      token: sessionData.session.access_token,
       user: {
         uid: user.id,
         email: user.email,
