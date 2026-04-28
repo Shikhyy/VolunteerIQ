@@ -6,14 +6,15 @@ const app = express()
 app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:5173' }))
 app.use(express.json())
 
-// Routes (create empty stubs)
-app.use('/api/auth', (req, res) => res.json({ status: 'ok' }))
-app.use('/api/tasks', (req, res) => res.json([]))
-app.use('/api/volunteers', (req, res) => res.json([]))
-app.use('/api/notifications', (req, res) => res.json([]))
-app.use('/api/csv', (req, res) => res.json({ status: 'ok' }))
-app.use('/api/match', (req, res) => res.json({ status: 'ok' }))
-app.use('/api/score', (req, res) => res.json({ status: 'ok' }))
+const authRoutes = require('./routes/api')
+const tasksRoutes = require('./routes/tasks')
+const matchRoutes = require('./routes/match')
+const scoreRoutes = require('./routes/score')
+
+app.use('/api/auth', authRoutes)
+app.use('/api/tasks', tasksRoutes)
+app.use('/api/match', matchRoutes)
+app.use('/api/score', scoreRoutes)
 
 app.get('/api/v1/health', (req, res) => res.json({ status: 'ok', devMode: process.env.DEV_MODE === 'true' }))
 

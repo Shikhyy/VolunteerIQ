@@ -1,1 +1,86 @@
-[]
+[
+  {
+    "id": "task-001",
+    "title": "Food Bank Weekend Distribution",
+    "description": "Help distribute food packages to families in need at the downtown food bank location.",
+    "category": "food-bank",
+    "urgency": 5,
+    "status": "open",
+    "slotsNeeded": 8,
+    "slotsFilled": 3,
+    "deadline": "2026-05-02T14:00:00Z",
+    "location": "Downtown Food Bank, 123 Main St",
+    "region": "downtown",
+    "createdAt": "2026-04-25T10:00:00Z"
+  },
+  {
+    "id": "task-002",
+    "title": "Senior Center Tech Support",
+    "description": "Assist seniors with learning to use smartphones and video calling apps to stay connected with family.",
+    "category": "senior-care",
+    "urgency": 3,
+    "status": "open",
+    "slotsNeeded": 4,
+    "slotsFilled": 1,
+    "deadline": "2026-05-10T10:00:00Z",
+    "location": "Sunrise Senior Center, 456 Oak Ave",
+    "region": "eastside",
+    "createdAt": "2026-04-26T09:00:00Z"
+  },
+  {
+    "id": "task-003",
+    "title": "Community Garden Spring Planting",
+    "description": "Help plant vegetables and herbs in the community garden for summer harvest to support local food pantry.",
+    "category": "environment",
+    "urgency": 4,
+    "status": "open",
+    "slotsNeeded": 12,
+    "slotsFilled": 8,
+    "deadline": "2026-05-05T09:00:00Z",
+    "location": "Riverside Community Garden, 789 River Rd",
+    "region": "riverside",
+    "createdAt": "2026-04-24T11:00:00Z"
+  },
+  {
+    "id": "task-004",
+    "title": "Homeless Shelter Evening Meals",
+    "description": "Prepare and serve dinner to homeless shelter residents. Cooking experience helpful but not required.",
+    "category": "homeless-support",
+    "urgency": 5,
+    "status": "open",
+    "slotsNeeded": 6,
+    "slotsFilled": 2,
+    "deadline": "2026-05-01T18:00:00Z",
+    "location": "Hope Shelter, 321 Pine St",
+    "region": "downtown",
+    "createdAt": "2026-04-27T08:00:00Z"
+  },
+  {
+    "id": "task-005",
+    "title": "Youth Tutoring - Math Fundamentals",
+    "description": "Tutor middle school students in algebra and geometry. Background check required.",
+    "category": "education",
+    "urgency": 2,
+    "status": "open",
+    "slotsNeeded": 5,
+    "slotsFilled": 5,
+    "deadline": "2026-05-15T15:00:00Z",
+    "location": "Youth Learning Center, 567 Elm Blvd",
+    "region": "westside",
+    "createdAt": "2026-04-20T14:00:00Z"
+  },
+  {
+    "id": "task-006",
+    "title": "Disaster Response Training",
+    "description": "Complete CERT (Community Emergency Response Team) training to assist in disaster situations.",
+    "category": "disaster-relief",
+    "urgency": 1,
+    "status": "open",
+    "slotsNeeded": 20,
+    "slotsFilled": 14,
+    "deadline": "2026-05-20T09:00:00Z",
+    "location": "Emergency Services Hub, 890 Safety Ln",
+    "region": "northside",
+    "createdAt": "2026-04-22T10:00:00Z"
+  }
+]
