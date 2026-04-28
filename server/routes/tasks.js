@@ -2,11 +2,27 @@ const express = require('express')
 const router = express.Router()
 const { DEV_MODE, loadJSON, saveJSON } = require('../middleware/devMode')
 const { requireAuth, requireAdmin } = require('../middleware/auth')
+const { supabase, isConfigured } = require('../services/supabase')
 
-router.get('/', requireAuth, (req, res) => {
+router.get('/', requireAuth, async (req, res) => {
   let tasks = []
+  
+  console.log('DEV_MODE:', DEV_MODE)
+  console.log('isConfigured:', isConfigured)
+  
   try {
-    tasks = DEV_MODE ? loadJSON('tasks.json') : []
+    if (DEV_MODE || !isConfigured) {
+      tasks = loadJSON('tasks.json')
+    } else {
+      console.log('Querying Supabase...')
+      const { data, error } = await supabase.from('tasks').select('*')
+      console.log('Supabase response:', { data, error })
+      if (error) {
+        console.error('Supabase error:', error.message)
+        return res.status(500).json({ error: error.message })
+      }
+      tasks = data || []
+    }
   } catch (err) {
     console.error('Error loading tasks:', err.message)
   }
@@ -33,14 +49,25 @@ router.get('/', requireAuth, (req, res) => {
   res.json(tasks)
 })
 
-router.get('/:id', requireAuth, (req, res) => {
-  let tasks = []
+router.get('/:id', requireAuth, async (req, res) => {
+  const { id } = req.params
+  let task = null
+  
   try {
-    tasks = DEV_MODE ? loadJSON('tasks.json') : []
+    if (DEV_MODE || !isConfigured) {
+      const tasks = loadJSON('tasks.json')
+      task = tasks.find(t => t.id === id)
+    } else {
+      const { data, error } = await supabase.from('tasks').select('*').eq('id', id).single()
+      if (error) {
+        console.error('Supabase error:', error.message)
+        return res.status(404).json({ error: 'Task not found' })
+      }
+      task = data
+    }
   } catch (err) {
-    console.error('Error loading tasks:', err.message)
+    console.error('Error getting task:', err.message)
   }
-  const task = tasks.find(t => t.id === req.params.id)
   
   if (!task) {
     return res.status(404).json({ error: 'Task not found' })
@@ -49,91 +76,96 @@ router.get('/:id', requireAuth, (req, res) => {
   res.json(task)
 })
 
-router.post('/', requireAdmin, (req, res) => {
-  let tasks = []
-  try {
-    tasks = DEV_MODE ? loadJSON('tasks.json') : []
-  } catch (err) {
-    console.error('Error loading tasks:', err.message)
-    return res.status(500).json({ error: 'Failed to load tasks' })
-  }
+router.post('/', requireAuth, requireAdmin, async (req, res) => {
+  const { title, description, category, urgency, address, city, district, deadline, slots_needed, required_skills } = req.body
   
   const newTask = {
-    id: `task-${Date.now()}`,
-    ...req.body,
-    createdAt: new Date().toISOString(),
+    title,
+    description,
+    category,
+    urgency: urgency || 3,
     status: 'open',
-    slotsFilled: 0
+    address,
+    city,
+    district,
+    deadline,
+    slots_needed: slots_needed || 1,
+    slots_filled: 0,
+    required_skills: required_skills || [],
+    priority_score: 0.5,
   }
   
-  tasks.push(newTask)
-  
-  if (DEV_MODE) {
-    try {
+  try {
+    if (DEV_MODE || !isConfigured) {
+      const tasks = loadJSON('tasks.json')
+      newTask.id = String(Date.now())
+      tasks.push(newTask)
       saveJSON('tasks.json', tasks)
-    } catch (err) {
-      console.error('Error saving tasks:', err.message)
-      return res.status(500).json({ error: 'Failed to save task' })
+    } else {
+      const { data, error } = await supabase.from('tasks').insert(newTask).select().single()
+      if (error) {
+        console.error('Supabase error:', error.message)
+        return res.status(500).json({ error: error.message })
+      }
+      newTask = data
     }
+  } catch (err) {
+    console.error('Error creating task:', err.message)
+    return res.status(500).json({ error: err.message })
   }
   
   res.status(201).json(newTask)
 })
 
-router.put('/:id', requireAdmin, (req, res) => {
-  let tasks = []
+router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
+  const { id } = req.params
+  const updates = req.body
+  
   try {
-    tasks = DEV_MODE ? loadJSON('tasks.json') : []
-  } catch (err) {
-    console.error('Error loading tasks:', err.message)
-    return res.status(500).json({ error: 'Failed to load tasks' })
-  }
-  const index = tasks.findIndex(t => t.id === req.params.id)
-  
-  if (index === -1) {
-    return res.status(404).json({ error: 'Task not found' })
-  }
-  
-  tasks[index] = { ...tasks[index], ...req.body, updatedAt: new Date().toISOString() }
-  
-  if (DEV_MODE) {
-    try {
+    if (DEV_MODE || !isConfigured) {
+      const tasks = loadJSON('tasks.json')
+      const index = tasks.findIndex(t => String(t.id) === String(id))
+      if (index === -1) {
+        return res.status(404).json({ error: 'Task not found' })
+      }
+      tasks[index] = { ...tasks[index], ...updates }
       saveJSON('tasks.json', tasks)
-    } catch (err) {
-      console.error('Error saving tasks:', err.message)
-      return res.status(500).json({ error: 'Failed to save task' })
+      res.json(tasks[index])
+    } else {
+      const { data, error } = await supabase.from('tasks').update(updates).eq('id', id).select().single()
+      if (error) {
+        console.error('Supabase error:', error.message)
+        return res.status(500).json({ error: error.message })
+      }
+      res.json(data)
     }
+  } catch (err) {
+    console.error('Error updating task:', err.message)
+    res.status(500).json({ error: err.message })
   }
-  
-  res.json(tasks[index])
 })
 
-router.delete('/:id', requireAdmin, (req, res) => {
-  let tasks = []
+router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
+  const { id } = req.params
+  
   try {
-    tasks = DEV_MODE ? loadJSON('tasks.json') : []
-  } catch (err) {
-    console.error('Error loading tasks:', err.message)
-    return res.status(500).json({ error: 'Failed to load tasks' })
-  }
-  const index = tasks.findIndex(t => t.id === req.params.id)
-  
-  if (index === -1) {
-    return res.status(404).json({ error: 'Task not found' })
-  }
-  
-  const deleted = tasks.splice(index, 1)[0]
-  
-  if (DEV_MODE) {
-    try {
-      saveJSON('tasks.json', tasks)
-    } catch (err) {
-      console.error('Error saving tasks:', err.message)
-      return res.status(500).json({ error: 'Failed to save task' })
+    if (DEV_MODE || !isConfigured) {
+      const tasks = loadJSON('tasks.json')
+      const filtered = tasks.filter(t => String(t.id) !== String(id))
+      saveJSON('tasks.json', filtered)
+    } else {
+      const { error } = await supabase.from('tasks').delete().eq('id', id)
+      if (error) {
+        console.error('Supabase error:', error.message)
+        return res.status(500).json({ error: error.message })
+      }
     }
+  } catch (err) {
+    console.error('Error deleting task:', err.message)
+    return res.status(500).json({ error: err.message })
   }
   
-  res.json({ message: 'Task deleted', task: deleted })
+  res.json({ success: true })
 })
 
 module.exports = router
