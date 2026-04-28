@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { 
   Home, Users, Map, BarChart3, FileText, Upload, 
-  Settings, LogOut, Menu, X, Search, Bell, Plus, ChevronLeft, Menu as MenuIcon, TrendingUp
+  Settings, LogOut, Menu, X, Search, Bell, Plus, ChevronLeft, Menu as MenuIcon, TrendingUp, HelpCircle
 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { notifications as notificationsApi } from '../../api/client'
@@ -175,6 +175,19 @@ export default function Layout({ children }) {
             <Settings size={18} />
             <span className={`text-sm tracking-wide ${sidebarCollapsed ? 'hidden lg:block' : 'block'}`}>
               Settings
+            </span>
+          </Link>
+          <Link
+            to="/help"
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+              location.pathname === '/help'
+                ? 'bg-white/[0.06] text-[#D6CCC2]'
+                : 'text-white/50 hover:text-white hover:bg-white/[0.03]'
+            }`}
+          >
+            <HelpCircle size={18} />
+            <span className={`text-sm tracking-wide ${sidebarCollapsed ? 'hidden lg:block' : 'block'}`}>
+              Help
             </span>
           </Link>
           <button

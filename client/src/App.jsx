@@ -18,6 +18,7 @@ import TaskBrowser from './pages/tasks/TaskBrowser'
 import TaskCreate from './pages/tasks/TaskCreate'
 import TaskDetail from './pages/tasks/TaskDetail'
 import ProfilePage from './pages/ProfilePage'
+import HelpPage from './pages/HelpPage'
 import SettingsPage from './pages/SettingsPage'
 import Notifications from './pages/notifications/Notifications'
 
@@ -116,6 +117,9 @@ export default function App() {
         } />
         <Route path="/settings" element={
           isAuthenticated ? <Layout><SettingsPage /></Layout> : <Navigate to="/login" />
+        } />
+        <Route path="/help" element={
+          isAuthenticated ? <Layout><HelpPage /></Layout> : <Navigate to="/login" />
         } />
         <Route path="/stats" element={
           isAuthenticated ? <Layout><Suspense fallback={<PageLoader />}><VolunteerStats /></Suspense></Layout> : <Navigate to="/login" />
