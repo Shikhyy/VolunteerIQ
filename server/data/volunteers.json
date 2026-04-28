@@ -1,1 +1,57 @@
-[]
+[
+  {
+    "id": "vol-001",
+    "name": "Sarah Johnson",
+    "email": "sarah.johnson@email.com",
+    "phone": "555-0101",
+    "skills": ["first-aid", "cpr", "medical", "emergency"],
+    "availability": ["weekdays", "weekends"],
+    "status": "active",
+    "hoursContributed": 45,
+    "joinedAt": "2026-01-15T10:00:00Z"
+  },
+  {
+    "id": "vol-002",
+    "name": "Michael Chen",
+    "email": "michael.chen@email.com",
+    "phone": "555-0102",
+    "skills": ["teaching", "mentoring", "childcare", "sports"],
+    "availability": ["weekends"],
+    "status": "active",
+    "hoursContributed": 32,
+    "joinedAt": "2026-02-01T14:30:00Z"
+  },
+  {
+    "id": "vol-003",
+    "name": "Emily Rodriguez",
+    "email": "emily.rodriguez@email.com",
+    "phone": "555-0103",
+    "skills": ["translation", "spanish", "outreach", "counseling"],
+    "availability": ["weekdays", "evenings"],
+    "status": "active",
+    "hoursContributed": 28,
+    "joinedAt": "2026-02-10T09:15:00Z"
+  },
+  {
+    "id": "vol-004",
+    "name": "David Thompson",
+    "email": "david.thompson@email.com",
+    "phone": "555-0104",
+    "skills": ["cooking", "food-handling", "logistics", "driving"],
+    "availability": ["weekdays"],
+    "status": "active",
+    "hoursContributed": 15,
+    "joinedAt": "2026-03-01T11:00:00Z"
+  },
+  {
+    "id": "vol-005",
+    "name": "Jennifer Williams",
+    "email": "jennifer.williams@email.com",
+    "phone": "555-0105",
+    "skills": ["administrative", "computers", "data-entry", "phone"],
+    "availability": ["weekdays", "weekends"],
+    "status": "active",
+    "hoursContributed": 52,
+    "joinedAt": "2025-12-20T08:00:00Z"
+  }
+]

@@ -6,15 +6,21 @@ const app = express()
 app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:5173' }))
 app.use(express.json())
 
-const authRoutes = require('./routes/api')
+const authRoutes = require('./routes/auth')
 const tasksRoutes = require('./routes/tasks')
 const matchRoutes = require('./routes/match')
 const scoreRoutes = require('./routes/score')
+const volunteersRoutes = require('./routes/volunteers')
+const notificationsRoutes = require('./routes/notifications')
+const csvRoutes = require('./routes/csv')
 
 app.use('/api/auth', authRoutes)
 app.use('/api/tasks', tasksRoutes)
 app.use('/api/match', matchRoutes)
 app.use('/api/score', scoreRoutes)
+app.use('/api/volunteers', volunteersRoutes)
+app.use('/api/notifications', notificationsRoutes)
+app.use('/api/csv', csvRoutes)
 
 app.get('/api/v1/health', (req, res) => res.json({ status: 'ok', devMode: process.env.DEV_MODE === 'true' }))
 
