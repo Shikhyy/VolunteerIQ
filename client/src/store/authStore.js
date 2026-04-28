@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import apiClient from '../api/client'
+import apiClient, { auth } from '../api/client'
 
 export const useAuthStore = create((set, get) => ({
   user: null,
@@ -12,7 +12,7 @@ export const useAuthStore = create((set, get) => ({
 
   login: async (email, password) => {
     try {
-      const { data } = await apiClient.auth.login({ email, password })
+      const { data } = await auth.login({ email, password })
       localStorage.setItem('authToken', data.token)
       set({ user: data.user, role: data.user.role || 'volunteer' })
       return data.user
@@ -24,7 +24,7 @@ export const useAuthStore = create((set, get) => ({
 
   signup: async (email, password, name) => {
     try {
-      const { data } = await apiClient.auth.register({ email, password, name })
+      const { data } = await auth.register({ email, password, name })
       localStorage.setItem('authToken', data.token)
       set({ user: data.user, role: 'volunteer' })
       return { user: data.user, name }
@@ -44,7 +44,7 @@ export const useAuthStore = create((set, get) => ({
 
   logout: async () => {
     try {
-      await apiClient.auth.logout()
+      await auth.logout()
     } catch (e) {
       // Ignore logout errors
     }
@@ -56,7 +56,7 @@ export const useAuthStore = create((set, get) => ({
     const token = localStorage.getItem('authToken')
     if (token && token !== 'dev-token' && token !== 'google-token') {
       try {
-        const { data } = await apiClient.auth.me()
+        const { data } = await auth.me()
         set({ user: data.user, role: data.user.role || 'volunteer', loading: false })
       } catch {
         localStorage.removeItem('authToken')
