@@ -12,11 +12,11 @@ const NOTIFICATION_ICONS = {
 }
 
 const NOTIFICATION_COLORS = {
-  task_assigned: 'text-blue-400 bg-blue-400/10',
-  task_reminder: 'text-yellow-400 bg-yellow-400/10',
-  match_ready: 'text-green-400 bg-green-400/10',
+  task_assigned: 'text-[#D6CCC2] bg-[#D6CCC2]/10',
+  task_reminder: 'text-amber-400 bg-amber-400/10',
+  match_ready: 'text-emerald-400 bg-emerald-400/10',
   task_completed: 'text-emerald-400 bg-emerald-400/10',
-  new_task: 'text-purple-400 bg-purple-400/10',
+  new_task: 'text-[#D6BDAF] bg-[#D6BDAF]/10',
 }
 
 export default function Notifications() {
