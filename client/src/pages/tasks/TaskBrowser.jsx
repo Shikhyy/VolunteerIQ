@@ -19,6 +19,13 @@ export default function TaskBrowser() {
   const { tasks, filters, setFilter, clearFilters } = useTaskStore()
   const [search, setSearch] = useState('')
   const [showFilters, setShowFilters] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    setLoading(true)
+    const timer = setTimeout(() => setLoading(false), 300)
+    return () => clearTimeout(timer)
+  }, [filters.category, filters.urgency, search])
 
   const categoryOptions = [
     { value: '', label: 'All Categories' },
@@ -113,7 +120,13 @@ export default function TaskBrowser() {
       </div>
 
       {/* Task Grid */}
-      {filteredTasks.length === 0 ? (
+      {loading ? (
+        <div className="grid md:grid-cols-2 gap-4">
+          {[1,2,3,4].map(i => (
+            <div key={i} className="h-48 bg-white/[0.02] rounded-xl animate-pulse" />
+          ))}
+        </div>
+      ) : filteredTasks.length === 0 ? (
         <Card className="p-12 text-center">
           <Search size={40} className="text-white/20 mx-auto mb-4" />
           <p className="text-white/40 mb-4">No tasks match your filters</p>

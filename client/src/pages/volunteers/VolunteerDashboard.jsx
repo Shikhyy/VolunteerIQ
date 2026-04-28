@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { 
   Clock, Users, TrendingUp, CheckCircle, ArrowRight, MapPin, 
@@ -21,6 +21,13 @@ export default function VolunteerDashboard() {
   const { tasks, myTasks } = useTaskStore()
   const { myProfile } = useVolunteerStore()
   const [activeTab, setActiveTab] = useState('active')
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    setLoading(true)
+    const timer = setTimeout(() => setLoading(false), 300)
+    return () => clearTimeout(timer)
+  }, [activeTab])
 
   const statsData = [
     { label: 'MY TASKS', value: myTasks.length, icon: CheckCircle, color: 'text-[#D6CCC2]' },
@@ -110,7 +117,13 @@ export default function VolunteerDashboard() {
         </div>
 
         <div className="p-6">
-          {myTasks.length === 0 ? (
+          {loading ? (
+            <div className="space-y-4">
+              {[1,2,3,4].map(i => (
+                <div key={i} className="h-32 bg-white/[0.02] rounded-xl animate-pulse" />
+              ))}
+            </div>
+          ) : myTasks.length === 0 ? (
             <div className="text-center py-16">
               <Target size={40} className="text-white/20 mx-auto mb-4" />
               <p className="text-white/40 mb-4 tracking-wide">No active tasks</p>

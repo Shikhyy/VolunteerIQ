@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { 
   Users, Clock, CheckCircle, TrendingUp, FileText, Upload, 
@@ -27,7 +27,14 @@ export default function AdminTaskManager() {
   const { tasks } = useTaskStore()
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('')
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    setLoading(true)
+    const timer = setTimeout(() => setLoading(false), 300)
+    return () => clearTimeout(timer)
+  }, [search, status])
 
   const handleEdit = (taskId) => {
     console.log('Edit task:', taskId)
@@ -104,7 +111,18 @@ export default function AdminTaskManager() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.06]">
-              {filteredTasks.map((task) => (
+              {loading ? (
+                <>
+                  {[1,2,3,4].map(i => (
+                    <tr key={i}>
+                      <td colSpan={7} className="px-6 py-4">
+                        <div className="h-6 bg-white/[0.02] rounded animate-pulse" />
+                      </td>
+                    </tr>
+                  ))}
+                </>
+              ) : (
+              filteredTasks.map((task) => (
                 <tr key={task.id} className="hover:bg-white/[0.02]">
                   <td className="px-6 py-4">
                     <p className="font-medium text-white">{task.title}</p>
@@ -141,6 +159,7 @@ export default function AdminTaskManager() {
                   </td>
                 </tr>
               ))}
+              )}
             </tbody>
           </table>
         </div>
