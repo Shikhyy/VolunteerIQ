@@ -17,6 +17,7 @@ const navItems = [
   { path: '/admin/tasks', label: 'Manage Tasks', icon: FileText, roles: ['admin'] },
   { path: '/admin/volunteers', label: 'Volunteers', icon: Users, roles: ['admin'] },
   { path: '/admin/import', label: 'Import', icon: Upload, roles: ['admin'] },
+  { path: '/admin/analytics', label: 'Analytics', icon: BarChart3, roles: ['admin'] },
 ]
 
 export default function Layout({ children }) {

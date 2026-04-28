@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './store/authStore'
-import { useEffect } from 'react'
+import { useEffect, lazy, Suspense } from 'react'
 import { ToastProvider } from './contexts/ToastContext'
 import './index.css'
 
@@ -16,13 +16,22 @@ import VolunteerDashboard from './pages/volunteers/VolunteerDashboard'
 import TaskBrowser from './pages/tasks/TaskBrowser'
 import TaskCreate from './pages/tasks/TaskCreate'
 import TaskDetail from './pages/tasks/TaskDetail'
-import MapView from './pages/map/MapView'
-import AdminDashboard from './pages/admin/AdminDashboard'
-import AdminTaskManager from './pages/admin/AdminTaskManager'
-import AdminVolunteerTable from './pages/admin/AdminVolunteerTable'
-import CSVImportPage from './pages/admin/CSVImportPage'
 import ProfilePage from './pages/ProfilePage'
 import Notifications from './pages/notifications/Notifications'
+
+// Lazy loaded admin pages
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'))
+const AdminTaskManager = lazy(() => import('./pages/admin/AdminTaskManager'))
+const AdminVolunteerTable = lazy(() => import('./pages/admin/AdminVolunteerTable'))
+const CSVImportPage = lazy(() => import('./pages/admin/CSVImportPage'))
+const AnalyticsDashboard = lazy(() => import('./pages/admin/AnalyticsDashboard'))
+const MapView = lazy(() => import('./pages/map/MapView'))
+
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-[400px]">
+    <div className="animate-spin w-8 h-8 border-2 border-[#D6CCC2] border-t-transparent rounded-full" />
+  </div>
+)
 
 export default function App() {
   const { user, loading, initAuth } = useAuthStore()
@@ -72,22 +81,26 @@ export default function App() {
           isAuthenticated ? <Layout><TaskDetail /></Layout> : <Navigate to="/login" />
         } />
         <Route path="/map" element={
-          isAuthenticated ? <Layout><MapView /></Layout> : <Navigate to="/login" />
+          isAuthenticated ? <Layout><Suspense fallback={<PageLoader />}><MapView /></Suspense></Layout> : <Navigate to="/login" />
         } />
         <Route path="/admin" element={
-          isAuthenticated && isAdmin ? <Layout><AdminDashboard /></Layout> : 
+          isAuthenticated && isAdmin ? <Layout><Suspense fallback={<PageLoader />}><AdminDashboard /></Suspense></Layout> : 
           isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
         } />
         <Route path="/admin/tasks" element={
-          isAuthenticated && isAdmin ? <Layout><AdminTaskManager /></Layout> : 
+          isAuthenticated && isAdmin ? <Layout><Suspense fallback={<PageLoader />}><AdminTaskManager /></Suspense></Layout> : 
           isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
         } />
         <Route path="/admin/volunteers" element={
-          isAuthenticated && isAdmin ? <Layout><AdminVolunteerTable /></Layout> : 
+          isAuthenticated && isAdmin ? <Layout><Suspense fallback={<PageLoader />}><AdminVolunteerTable /></Suspense></Layout> : 
           isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
         } />
         <Route path="/admin/import" element={
-          isAuthenticated && isAdmin ? <Layout><CSVImportPage /></Layout> : 
+          isAuthenticated && isAdmin ? <Layout><Suspense fallback={<PageLoader />}><CSVImportPage /></Suspense></Layout> : 
+          isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
+        } />
+        <Route path="/admin/analytics" element={
+          isAuthenticated && isAdmin ? <Layout><Suspense fallback={<PageLoader />}><AnalyticsDashboard /></Suspense></Layout> : 
           isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
         } />
         <Route path="/profile" element={
