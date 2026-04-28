@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Check, ChevronRight, ChevronLeft, MapPin, Clock, User } from 'lucide-react'
 import { Button, Input, Card } from '../components/ui'
+import { volunteers } from '../api/client'
 
 const skills = [
   'Medical', 'Logistics', 'Teaching', 'Construction', 'Tech', 'Admin', 'Cooking', 'Driving', 'Counseling', 'Translation'
@@ -61,9 +62,21 @@ export default function OnboardingPage() {
 
   const handleComplete = async () => {
     setLoading(true)
-    // Simulate saving
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    navigate('/dashboard')
+    try {
+      await volunteers.update('me', {
+        name: form.name,
+        phone: form.phone,
+        skills: form.skills,
+        city: form.city,
+        district: form.district,
+        availability: form.availability,
+      })
+      navigate('/dashboard')
+    } catch (err) {
+      console.error('Failed to save profile:', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const canProceed = () => {

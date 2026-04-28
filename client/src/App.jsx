@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './store/authStore'
 import { useEffect } from 'react'
+import { ToastProvider } from './contexts/ToastContext'
 import './index.css'
 
 // Layout
@@ -43,10 +44,12 @@ export default function App() {
   }
 
   const isAuthenticated = !!user
+  const isAdmin = user?.role === 'admin'
 
   return (
-    <BrowserRouter>
-      <Routes>
+    <ToastProvider>
+      <BrowserRouter>
+        <Routes>
         {/* Public routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" /> : <LoginPage />} />
@@ -72,16 +75,20 @@ export default function App() {
           isAuthenticated ? <Layout><MapView /></Layout> : <Navigate to="/login" />
         } />
         <Route path="/admin" element={
-          isAuthenticated ? <Layout><AdminDashboard /></Layout> : <Navigate to="/login" />
+          isAuthenticated && isAdmin ? <Layout><AdminDashboard /></Layout> : 
+          isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
         } />
         <Route path="/admin/tasks" element={
-          isAuthenticated ? <Layout><AdminTaskManager /></Layout> : <Navigate to="/login" />
+          isAuthenticated && isAdmin ? <Layout><AdminTaskManager /></Layout> : 
+          isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
         } />
         <Route path="/admin/volunteers" element={
-          isAuthenticated ? <Layout><AdminVolunteerTable /></Layout> : <Navigate to="/login" />
+          isAuthenticated && isAdmin ? <Layout><AdminVolunteerTable /></Layout> : 
+          isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
         } />
         <Route path="/admin/import" element={
-          isAuthenticated ? <Layout><CSVImportPage /></Layout> : <Navigate to="/login" />
+          isAuthenticated && isAdmin ? <Layout><CSVImportPage /></Layout> : 
+          isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
         } />
         <Route path="/profile" element={
           isAuthenticated ? <Layout><ProfilePage /></Layout> : <Navigate to="/login" />
@@ -91,5 +98,6 @@ export default function App() {
         } />
       </Routes>
     </BrowserRouter>
+    </ToastProvider>
   )
 }

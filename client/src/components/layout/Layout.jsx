@@ -5,12 +5,14 @@ import {
   Settings, LogOut, Menu, X, Search, Bell, Plus, ChevronLeft, Menu as MenuIcon
 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
+import { notifications as notificationsApi } from '../../api/client'
 import Avatar from '../ui/Avatar'
 
 const navItems = [
   { path: '/dashboard', label: 'Home', icon: Home, roles: ['volunteer', 'admin'] },
   { path: '/tasks', label: 'Tasks', icon: Users, roles: ['volunteer', 'admin'] },
   { path: '/map', label: 'Map', icon: Map, roles: ['volunteer', 'admin'] },
+  { path: '/notifications', label: 'Notifications', icon: Bell, roles: ['volunteer', 'admin'] },
   { path: '/admin', label: 'Dashboard', icon: BarChart3, roles: ['admin'] },
   { path: '/admin/tasks', label: 'Manage Tasks', icon: FileText, roles: ['admin'] },
   { path: '/admin/volunteers', label: 'Volunteers', icon: Users, roles: ['admin'] },
@@ -21,12 +23,26 @@ export default function Layout({ children }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [notifications, setNotifications] = useState([])
   const location = useLocation()
   const navigate = useNavigate()
   const { user, role, logout } = useAuthStore()
 
   const currentRole = role || 'volunteer'
   const filteredNav = navItems.filter(item => item.roles.includes(currentRole))
+  const unreadCount = notifications.filter(n => !n.read).length
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const res = await notificationsApi.getAll()
+        setNotifications(res.data || [])
+      } catch (err) {
+        console.error('Failed to fetch notifications:', err)
+      }
+    }
+    fetchNotifications()
+  }, [])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -111,6 +127,7 @@ export default function Layout({ children }) {
           {filteredNav.map((item) => {
             const Icon = item.icon
             const isActive = location.pathname === item.path
+            const showBadge = item.path === '/notifications' && unreadCount > 0
             return (
               <Link
                 key={item.path}
@@ -129,6 +146,11 @@ export default function Layout({ children }) {
                 <span className={`text-sm tracking-wide ${sidebarCollapsed ? 'hidden lg:block' : 'block'} whitespace-nowrap`}>
                   {item.label}
                 </span>
+                {showBadge && (
+                  <span className="bg-[#D6CCC2] text-[#0A0A0A] text-xs font-bold px-1.5 py-0.5 rounded-full ml-auto">
+                    {unreadCount}
+                  </span>
+                )}
               </Link>
             )
           })}

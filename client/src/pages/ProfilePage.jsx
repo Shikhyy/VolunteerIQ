@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Camera, MapPin, Clock, Mail, Phone, User } from 'lucide-react'
 import { Card, Button, Input, Avatar } from '../components/ui'
 import { useAuthStore } from '../store/authStore'
+import { useToast } from '../contexts/ToastContext'
+import { volunteers } from '../api/client'
 
 const skills = ['Medical', 'Logistics', 'Teaching', 'Construction', 'Tech', 'Admin', 'Cooking', 'Driving']
 
@@ -9,6 +11,7 @@ const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
 
 export default function ProfilePage() {
   const { user } = useAuthStore()
+  const { showToast } = useToast()
   const [activeTab, setActiveTab] = useState('profile')
   const [form, setForm] = useState({
     name: user?.displayName || 'Jane Doe',
@@ -41,8 +44,15 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     setLoading(true)
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setLoading(false)
+    try {
+      await volunteers.update('me', form)
+      showToast('Profile saved successfully!', 'success')
+    } catch (err) {
+      console.error('Failed to save profile:', err)
+      showToast('Failed to save profile', 'error')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const tabs = [

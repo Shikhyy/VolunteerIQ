@@ -24,7 +24,7 @@ export default function AdminDashboard() {
     { label: 'TOTAL TASKS', value: tasks.length, icon: FileText },
     { label: 'OPEN', value: tasks.filter(t => t.status === 'open').length, icon: Clock },
     { label: 'VOLUNTEERS', value: volunteers.length, icon: Users },
-    { label: 'COMPLETED', value: 156, icon: CheckCircle },
+    { label: 'COMPLETED', value: tasks.filter(t => t.status === 'completed').length, icon: CheckCircle },
   ]
 
   const categoryData = [

@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Search, Download, Mail, Phone, Edit, Trash2 } from 'lucide-react'
 import { Card, Badge, Button, Input, Select } from '../../components/ui'
 import Avatar from '../../components/ui/Avatar'
 import { useVolunteerStore } from '../../store/volunteerStore'
+import { volunteers as volunteersApi } from '../../api/client'
 
 const statusOptions = [
   { value: '', label: 'All Status' },
@@ -23,6 +25,23 @@ export default function AdminVolunteerTable() {
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('')
   const [skill, setSkill] = useState('')
+  const navigate = useNavigate()
+
+  const handleEdit = (volunteerId) => {
+    console.log('Edit volunteer:', volunteerId)
+    navigate(`/volunteers/${volunteerId}/edit`)
+  }
+
+  const handleDelete = async (volunteerId) => {
+    if (window.confirm('Are you sure you want to delete this volunteer?')) {
+      try {
+        await volunteersApi.update(volunteerId, { status: 'inactive' })
+        window.location.reload()
+      } catch (err) {
+        console.error('Failed to delete volunteer:', err)
+      }
+    }
+  }
 
   const filteredVolunteers = volunteers.filter(vol => {
     if (search && !vol.name.toLowerCase().includes(search.toLowerCase())) return false
@@ -133,10 +152,10 @@ export default function AdminVolunteerTable() {
                       <button className="p-1.5 hover:bg-white/10 rounded" title="Call">
                         <Phone size={14} className="text-white/50" />
                       </button>
-                      <button className="p-1.5 hover:bg-white/10 rounded">
+                      <button className="p-1.5 hover:bg-white/10 rounded" title="Edit" onClick={() => handleEdit(vol.id)}>
                         <Edit size={14} className="text-white/50" />
                       </button>
-                      <button className="p-1.5 hover:bg-white/10 rounded">
+                      <button className="p-1.5 hover:bg-white/10 rounded" title="Delete" onClick={() => handleDelete(vol.id)}>
                         <Trash2 size={14} className="text-red-400" />
                       </button>
                     </div>

@@ -8,6 +8,7 @@ import { Card, Badge, Button, Avatar, Spinner } from '../../components/ui'
 import { useTaskStore } from '../../store/taskStore'
 import { useVolunteerStore } from '../../store/volunteerStore'
 import { useAuthStore } from '../../store/authStore'
+import { useToast } from '../../contexts/ToastContext'
 import { tasks as tasksApi } from '../../api/client'
 
 const urgencyVariant = {
@@ -39,6 +40,7 @@ export default function TaskDetail() {
   const { tasks, selectTask } = useTaskStore()
   const { matchResults, setMatchResults } = useVolunteerStore()
   const { user, role } = useAuthStore()
+  const { showToast } = useToast()
   
   const [loading, setLoading] = useState(false)
   const [recalculating, setRecalculating] = useState(false)
@@ -72,7 +74,7 @@ export default function TaskDetail() {
     setApplying(true)
     setTimeout(() => {
       setApplying(false)
-      alert('Application submitted successfully!')
+      showToast('Application submitted successfully!', 'success')
     }, 1000)
   }
 

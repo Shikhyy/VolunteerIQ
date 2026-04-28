@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react'
 import { Upload, FileText, Download, CheckCircle, ArrowRight, X } from 'lucide-react'
 import { Card, Button } from '../../components/ui'
+import { useToast } from '../../contexts/ToastContext'
+import { csv } from '../../api/client'
 
 const sampleCSV = `title,description,category,urgency,address,city,slots_needed
 Medical camp setup,Set up a 50-bed medical camp,Medical,5,Okhla Industrial Area,Delhi,8
@@ -20,7 +22,21 @@ const columnOptions = [
   { value: 'skip', label: 'Skip Column' },
 ]
 
+const parseCSV = (file, setHeaders, setCsvData) => {
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    const text = e.target.result
+    const lines = text.split('\n').filter(l => l.trim())
+    const firstLine = lines[0]
+    const detectedHeaders = firstLine.split(',').map(h => h.trim())
+    setHeaders(detectedHeaders)
+    setCsvData(lines.slice(1).map(line => line.split(',')))
+  }
+  reader.readAsText(file)
+}
+
 export default function CSVImportPage() {
+  const { showToast } = useToast()
   const [step, setStep] = useState(1)
   const [file, setFile] = useState(null)
   const [csvData, setCsvData] = useState([])
@@ -34,22 +50,9 @@ export default function CSVImportPage() {
     const droppedFile = e.dataTransfer.files[0] || e.target.files[0]
     if (droppedFile && droppedFile.name.endsWith('.csv')) {
       setFile(droppedFile)
-      parseCSV(droppedFile)
+      parseCSV(droppedFile, setHeaders, setCsvData)
     }
-  }, [])
-
-  const parseCSV = (file) => {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const text = e.target.result
-      const lines = text.split('\n').filter(l => l.trim())
-      const firstLine = lines[0]
-      const detectedHeaders = firstLine.split(',').map(h => h.trim())
-      setHeaders(detectedHeaders)
-      setCsvData(lines.slice(1).map(line => line.split(',')))
-    }
-    reader.readAsText(file)
-  }
+  }, [setHeaders, setCsvData])
 
   const handleDownload = () => {
     const blob = new Blob([sampleCSV], { type: 'text/csv' })
@@ -62,9 +65,19 @@ export default function CSVImportPage() {
 
   const handleImport = async () => {
     setImporting(true)
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    setImportComplete(true)
-    setImporting(false)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('columnMap', JSON.stringify(columnMap))
+      await csv.import(formData)
+      setImportComplete(true)
+      showToast(`Successfully imported ${csvData.length} tasks!`, 'success')
+    } catch (err) {
+      console.error('Failed to import:', err)
+      showToast('Failed to import tasks', 'error')
+    } finally {
+      setImporting(false)
+    }
   }
 
   const canProceed = () => {

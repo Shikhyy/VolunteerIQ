@@ -1,10 +1,12 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { 
   Users, Clock, CheckCircle, TrendingUp, FileText, Upload, 
   Plus, Search, Download, Edit, Trash2, Eye, MoreVertical
 } from 'lucide-react'
 import { Card, Badge, Button, Input, Select } from '../../components/ui'
 import { useTaskStore } from '../../store/taskStore'
+import { tasks as tasksApi } from '../../api/client'
 
 const statusOptions = [
   { value: '', label: 'All Status' },
@@ -25,6 +27,23 @@ export default function AdminTaskManager() {
   const { tasks } = useTaskStore()
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('')
+  const navigate = useNavigate()
+
+  const handleEdit = (taskId) => {
+    console.log('Edit task:', taskId)
+    navigate(`/tasks/${taskId}/edit`)
+  }
+
+  const handleDelete = async (taskId) => {
+    if (window.confirm('Are you sure you want to delete this task?')) {
+      try {
+        await tasksApi.delete(taskId)
+        window.location.reload()
+      } catch (err) {
+        console.error('Failed to delete task:', err)
+      }
+    }
+  }
 
   const filteredTasks = tasks.filter(task => {
     if (search && !task.title.toLowerCase().includes(search.toLowerCase())) return false
@@ -106,12 +125,17 @@ export default function AdminTaskManager() {
                     {task.deadline ? new Date(task.deadline).toLocaleDateString() : '-'}
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <button className="p-1.5 hover:bg-white/10 rounded">
-                        <Eye size={14} className="text-white/50" />
+                    <div className="flex items-center gap-1">
+                      <button className="p-1.5 hover:bg-white/10 rounded" title="View">
+                        <Link to={`/tasks/${task.id}`}>
+                          <Eye size={14} className="text-white/50" />
+                        </Link>
                       </button>
-                      <button className="p-1.5 hover:bg-white/10 rounded">
+                      <button className="p-1.5 hover:bg-white/10 rounded" title="Edit" onClick={() => handleEdit(task.id)}>
                         <Edit size={14} className="text-white/50" />
+                      </button>
+                      <button className="p-1.5 hover:bg-white/10 rounded" title="Delete" onClick={() => handleDelete(task.id)}>
+                        <Trash2 size={14} className="text-red-400" />
                       </button>
                     </div>
                   </td>

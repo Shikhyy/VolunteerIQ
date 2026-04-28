@@ -25,8 +25,8 @@ export default function VolunteerDashboard() {
   const statsData = [
     { label: 'MY TASKS', value: myTasks.length, icon: CheckCircle, color: 'text-[#D6CCC2]' },
     { label: 'COMPLETED', value: myProfile?.tasksCompleted || 0, icon: Award, color: 'text-[#D5BDAF]' },
-    { label: 'HOURS', value: 24, icon: Clock, color: 'text-[#E3D5CA]' },
-    { label: 'TEAM', value: 5, icon: Users, color: 'text-white/60' },
+    { label: 'HOURS', value: myProfile?.hoursVolunteered || 0, icon: Clock, color: 'text-[#E3D5CA]' },
+    { label: 'TEAM', value: myProfile?.teamSize || 0, icon: Users, color: 'text-white/60' },
   ]
 
   const tabs = [
