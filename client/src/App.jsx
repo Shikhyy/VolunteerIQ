@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './store/authStore'
 import { useEffect, lazy, Suspense } from 'react'
 import { ToastProvider } from './contexts/ToastContext'
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts'
 import './index.css'
 
 // Layout
@@ -35,6 +36,8 @@ const PageLoader = () => (
 
 export default function App() {
   const { user, loading, initAuth } = useAuthStore()
+
+  useKeyboardShortcuts()
 
   useEffect(() => {
     initAuth()
