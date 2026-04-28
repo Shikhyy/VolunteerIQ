@@ -1,74 +1,143 @@
 const express = require('express')
 const router = express.Router()
-const { DEV_MODE, loadJSON, saveJSON } = require('../middleware/devMode')
-const { requireAuth } = require('../middleware/auth')
+const { createClient } = require('@supabase/supabase-js')
 
-router.post('/login', (req, res) => {
+const supabaseUrl = process.env.SUPABASE_URL
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY
+const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+router.post('/login', async (req, res) => {
   const { email, password } = req.body
 
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password required' })
   }
 
-  if (DEV_MODE) {
-    return res.json({
-      id: 'dev-user',
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
-      name: 'Dev User',
-      role: 'volunteer',
-      token: 'dev-token-' + Date.now()
+      password
     })
-  }
 
-  res.status(401).json({ error: 'Invalid credentials' })
+    if (error) {
+      console.error('Supabase auth error:', error)
+      return res.status(401).json({ error: error.message })
+    }
+
+    const { user, session } = data
+
+    // Get user profile from profiles table
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single()
+
+    res.json({
+      token: session.access_token,
+      user: {
+        uid: user.id,
+        email: user.email,
+        displayName: profile?.full_name || user.email,
+        photoURL: profile?.avatar_url,
+        role: profile?.role || 'volunteer'
+      }
+    })
+  } catch (error) {
+    console.error('Login error:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
 })
 
-router.post('/signup', (req, res) => {
+router.post('/register', async (req, res) => {
   const { email, password, name } = req.body
 
   if (!email || !password || !name) {
     return res.status(400).json({ error: 'Email, password, and name required' })
   }
 
-  if (DEV_MODE) {
-    return res.status(201).json({
-      id: 'user-' + Date.now(),
+  try {
+    const { data, error } = await supabase.auth.signUp({
       email,
-      name,
-      role: 'volunteer',
-      token: 'dev-token-' + Date.now()
+      password,
+      options: {
+        data: { full_name: name }
+      }
     })
-  }
 
-  res.status(201).json({
-    id: 'user-' + Date.now(),
-    email,
-    name,
-    role: 'volunteer'
-  })
+    if (error) {
+      console.error('Supabase signup error:', error)
+      return res.status(400).json({ error: error.message })
+    }
+
+    const { user, session } = data
+
+    // Create profile
+    if (user) {
+      await supabase.from('profiles').insert({
+        id: user.id,
+        email: user.email,
+        full_name: name,
+        role: 'volunteer'
+      })
+    }
+
+    res.status(201).json({
+      token: session?.access_token,
+      user: {
+        uid: user.id,
+        email: user.email,
+        displayName: name,
+        role: 'volunteer'
+      }
+    })
+  } catch (error) {
+    console.error('Signup error:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
 })
 
-router.post('/logout', (req, res) => {
+router.post('/logout', async (req, res) => {
+  try {
+    await supabase.auth.signOut()
+  } catch (e) {}
   res.json({ message: 'Logged out' })
 })
 
-router.get('/me', requireAuth, (req, res) => {
-  const token = req.headers.authorization?.replace('Bearer ', '')
-
-  if (DEV_MODE && token?.startsWith('dev-token-')) {
-    return res.json({
-      id: 'dev-user',
-      email: 'dev@example.com',
-      name: 'Dev User',
-      role: 'volunteer'
-    })
-  }
+router.get('/me', async (req, res) => {
+  const authHeader = req.headers.authorization
+  const token = authHeader?.replace('Bearer ', '')
 
   if (!token) {
     return res.status(401).json({ error: 'Not authenticated' })
   }
 
-  res.json({ id: 'user-1', email: 'user@example.com', name: 'Test User', role: 'volunteer' })
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser(token)
+
+    if (error || !user) {
+      return res.status(401).json({ error: 'Invalid token' })
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single()
+
+    res.json({
+      user: {
+        uid: user.id,
+        email: user.email,
+        displayName: profile?.full_name || user.email,
+        photoURL: profile?.avatar_url,
+        role: profile?.role || 'volunteer'
+      }
+    })
+  } catch (error) {
+    console.error('Get user error:', error)
+    res.status(401).json({ error: 'Invalid token' })
+  }
 })
 
 module.exports = router

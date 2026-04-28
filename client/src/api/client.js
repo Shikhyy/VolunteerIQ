@@ -32,8 +32,8 @@ apiClient.interceptors.response.use(
 )
 
 export const tasks = {
-  getAll: () => apiClient.get('/api/tasks'),
-  getById: (id) => apiClient.get(`/api/tasks/${id}`),
+  list: (params) => apiClient.get('/api/tasks', { params }),
+  get: (id) => apiClient.get(`/api/tasks/${id}`),
   create: (data) => apiClient.post('/api/tasks', data),
   update: (id, data) => apiClient.put(`/api/tasks/${id}`, data),
   delete: (id) => apiClient.delete(`/api/tasks/${id}`),

@@ -1,47 +1,69 @@
 import { create } from 'zustand'
-
-const mockUser = {
-  uid: 'dev-user-001',
-  email: 'demo@volunteeriq.org',
-  displayName: 'Demo User',
-  photoURL: null,
-  role: 'volunteer'
-}
+import apiClient from '../api/client'
 
 export const useAuthStore = create((set, get) => ({
-  user: mockUser,
-  role: 'volunteer',
-  loading: false,
-  devMode: true,
+  user: null,
+  role: null,
+  loading: true,
+  devMode: false,
 
-  setUser: (user) => set({ user }),
+  setUser: (user) => set({ user, role: user?.role || 'volunteer' }),
   setRole: (role) => set({ role }),
 
   login: async (email, password) => {
-    localStorage.setItem('authToken', 'dev-token')
-    set({ user: mockUser, role: 'volunteer' })
-    return mockUser
+    try {
+      const { data } = await apiClient.auth.login({ email, password })
+      localStorage.setItem('authToken', data.token)
+      set({ user: data.user, role: data.user.role || 'volunteer' })
+      return data.user
+    } catch (error) {
+      console.error('Login failed:', error)
+      throw error
+    }
   },
 
   signup: async (email, password, name) => {
-    localStorage.setItem('authToken', 'dev-token')
-    const user = { ...mockUser, displayName: name, email }
-    set({ user, role: 'volunteer' })
-    return { user: mockUser, name }
+    try {
+      const { data } = await apiClient.auth.register({ email, password, name })
+      localStorage.setItem('authToken', data.token)
+      set({ user: data.user, role: 'volunteer' })
+      return { user: data.user, name }
+    } catch (error) {
+      console.error('Signup failed:', error)
+      throw error
+    }
   },
 
   loginWithGoogle: async () => {
-    localStorage.setItem('authToken', 'dev-token')
+    // For demo, use mock Google login
+    const mockUser = { uid: 'google-user', email: 'user@gmail.com', displayName: 'Google User', role: 'volunteer' }
+    localStorage.setItem('authToken', 'google-token')
     set({ user: mockUser, role: 'volunteer' })
     return mockUser
   },
 
   logout: async () => {
+    try {
+      await apiClient.auth.logout()
+    } catch (e) {
+      // Ignore logout errors
+    }
     localStorage.removeItem('authToken')
     set({ user: null, role: null })
   },
 
-  initAuth: () => {
-    set({ user: mockUser, role: 'volunteer', loading: false })
+  initAuth: async () => {
+    const token = localStorage.getItem('authToken')
+    if (token && token !== 'dev-token' && token !== 'google-token') {
+      try {
+        const { data } = await apiClient.auth.me()
+        set({ user: data.user, role: data.user.role || 'volunteer', loading: false })
+      } catch {
+        localStorage.removeItem('authToken')
+        set({ user: null, role: null, loading: false })
+      }
+    } else {
+      set({ user: null, role: null, loading: false })
+    }
   },
 }))
