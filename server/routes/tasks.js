@@ -4,7 +4,7 @@ const { DEV_MODE, loadJSON, saveJSON } = require('../middleware/devMode')
 const { requireAuth, requireAdmin } = require('../middleware/auth')
 const { supabase, isConfigured } = require('../services/supabase')
 
-router.get('/', requireAuth, async (req, res) => {
+router.get('/', async (req, res) => {
   let tasks = []
   
   try {
@@ -43,7 +43,7 @@ router.get('/', requireAuth, async (req, res) => {
   res.json(tasks)
 })
 
-router.get('/:id', requireAuth, async (req, res) => {
+router.get('/:id', async (req, res) => {
   const { id } = req.params
   let task = null
   

@@ -16,16 +16,14 @@ const urgencyVariant = {
 }
 
 export default function TaskBrowser() {
-  const { tasks, filters, setFilter, clearFilters } = useTaskStore()
+  const { tasks, filters, setFilter, clearFilters, fetchTasks } = useTaskStore()
   const [search, setSearch] = useState('')
   const [showFilters, setShowFilters] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    setLoading(true)
-    const timer = setTimeout(() => setLoading(false), 300)
-    return () => clearTimeout(timer)
-  }, [filters.category, filters.urgency, search])
+    fetchTasks().finally(() => setLoading(false))
+  }, [])
 
   const categoryOptions = [
     { value: '', label: 'All Categories' },
