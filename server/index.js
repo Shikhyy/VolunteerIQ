@@ -17,5 +17,14 @@ app.use('/api/score', (req, res) => res.json({ status: 'ok' }))
 
 app.get('/api/v1/health', (req, res) => res.json({ status: 'ok', devMode: process.env.DEV_MODE === 'true' }))
 
+app.use((req, res) => {
+  res.status(404).json({ error: 'Not found' })
+})
+
+app.use((err, req, res, next) => {
+  console.error('Server error:', err.message)
+  res.status(500).json({ error: 'Internal server error' })
+})
+
 const PORT = process.env.PORT || 5000
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
