@@ -1,8 +1,6 @@
 import { useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
 
-export function useKeyboardShortcuts() {
-  const navigate = useNavigate()
+export function useKeyboardShortcuts(navigate) {
   const keyBuffer = useRef('')
 
   useEffect(() => {
@@ -31,7 +29,7 @@ export function useKeyboardShortcuts() {
         return
       }
 
-      if (keyBuffer.current === 'g') {
+      if (keyBuffer.current === 'g' && navigate) {
         e.preventDefault()
         keyBuffer.current = ''
         

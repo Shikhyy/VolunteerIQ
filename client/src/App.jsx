@@ -37,14 +37,15 @@ const PageLoader = () => (
   </div>
 )
 
-export default function App() {
+function AppContent() {
   const { user, loading, initAuth } = useAuthStore()
-
-  useKeyboardShortcuts()
+  const navigate = useNavigateFromHook()
 
   useEffect(() => {
     initAuth()
   }, [initAuth])
+
+  useKeyboardShortcuts(navigate)
 
   if (loading) {
     return (
@@ -62,9 +63,7 @@ export default function App() {
   const isAdmin = user?.role === 'admin'
 
   return (
-    <ToastProvider>
-      <BrowserRouter>
-        <Routes>
+    <Routes>
         {/* Public routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" /> : <LoginPage />} />
@@ -125,7 +124,20 @@ export default function App() {
           isAuthenticated ? <Layout><Suspense fallback={<PageLoader />}><VolunteerStats /></Suspense></Layout> : <Navigate to="/login" />
         } />
       </Routes>
-    </BrowserRouter>
+  )
+}
+
+function useNavigateFromHook() {
+  const { useNavigate } = require('react-router-dom')
+  return useNavigate()
+}
+
+export default function App() {
+  return (
+    <ToastProvider>
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
     </ToastProvider>
   )
 }
