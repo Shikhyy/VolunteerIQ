@@ -1,13 +1,12 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, ArrowLeft, Menu, X } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 import { Button, Input } from '../components/ui'
 import { useAuthStore } from '../store/authStore'
 
 export default function LoginPage() {
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [email, setEmail] = useState('demo@volunteeriq.org')
-  const [password, setPassword] = useState('demo123456')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -42,19 +41,8 @@ export default function LoginPage() {
     }
   }
 
-  const handleDemoLogin = async () => {
-    setLoading(true)
-    try {
-      await login('demo@volunteeriq.org', 'demo123456')
-      navigate('/dashboard')
-    } finally {
-      setLoading(false)
-    }
-  }
-
   return (
     <div className="min-h-screen bg-[#0A0A0A] flex flex-col">
-      {/* Minimal Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50">
         <div className="flex items-center justify-between px-6 py-5">
           <Link to="/" className="flex items-center gap-2">
@@ -69,7 +57,6 @@ export default function LoginPage() {
         </div>
       </nav>
 
-      {/* Centered Form */}
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
           <h2 className="text-4xl font-bold text-center mb-2 tracking-tight">
@@ -130,15 +117,6 @@ export default function LoginPage() {
               <span className="px-4 bg-[#0A0A0A] text-white/30">or</span>
             </div>
           </div>
-
-          <Button 
-            variant="ghost"
-            className="w-full border border-white/10 text-white/60 hover:text-white hover:border-white/30"
-            onClick={handleDemoLogin}
-            loading={loading}
-          >
-            TRY DEMO ACCOUNT
-          </Button>
 
           <p className="mt-10 text-center text-white/40 text-sm tracking-wide">
             Don't have an account?{' '}

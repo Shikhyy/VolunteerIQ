@@ -3,16 +3,13 @@ const router = express.Router()
 const { DEV_MODE, loadJSON, saveJSON } = require('../middleware/devMode')
 const { requireAuth } = require('../middleware/auth')
 
-router.get('/', requireAuth, (req, res) => {
+router.get('/', (req, res) => {
   let notifications = []
   try {
     notifications = DEV_MODE ? loadJSON('notifications.json') : []
   } catch (err) {
     console.error('Error loading notifications:', err.message)
   }
-
-  const userId = req.user?.id
-  notifications = notifications.filter(n => n.userId === userId || n.userId === undefined)
 
   const { unreadOnly } = req.query
   if (unreadOnly === 'true') {
@@ -24,7 +21,7 @@ router.get('/', requireAuth, (req, res) => {
   res.json(notifications)
 })
 
-router.put('/:id/read', requireAuth, (req, res) => {
+router.put('/:id/read', (req, res) => {
   let notifications = []
   try {
     notifications = DEV_MODE ? loadJSON('notifications.json') : []
@@ -32,8 +29,7 @@ router.put('/:id/read', requireAuth, (req, res) => {
     console.error('Error loading notifications:', err.message)
     return res.status(500).json({ error: 'Failed to load notifications' })
   }
-  const userId = req.user?.id
-  const notification = notifications.find(n => n.id === req.params.id && (n.userId === userId || n.userId === undefined))
+  const notification = notifications.find(n => n.id === req.params.id)
 
   if (!notification) {
     return res.status(404).json({ error: 'Notification not found' })
@@ -55,7 +51,7 @@ router.put('/:id/read', requireAuth, (req, res) => {
   res.json(notifications[index])
 })
 
-router.put('/read-all', requireAuth, (req, res) => {
+router.put('/read-all', (req, res) => {
   let notifications = []
   try {
     notifications = DEV_MODE ? loadJSON('notifications.json') : []
@@ -64,11 +60,9 @@ router.put('/read-all', requireAuth, (req, res) => {
     return res.status(500).json({ error: 'Failed to load notifications' })
   }
 
-  const userId = req.user?.id
   let updated = 0
-  const original = [...notifications]
   notifications = notifications.map((n, i) => {
-    if ((n.userId === userId || n.userId === undefined) && !n.read) {
+    if (!n.read) {
       updated++
       return { ...n, read: true, readAt: new Date().toISOString() }
     }
