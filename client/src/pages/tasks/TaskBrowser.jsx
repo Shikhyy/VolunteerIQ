@@ -1,11 +1,7 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { 
-  Search, Filter, MapPin, Clock, Users, X, Layers, ChevronRight,
-  Calendar, CheckCircle, AlertCircle
-} from 'lucide-react'
+import { Search, Filter, MapPin, Users, Clock, ChevronRight } from 'lucide-react'
 import { Card, Badge, Button, Input, Select } from '../../components/ui'
-import { useTaskStore } from '../../store/taskStore'
 
 const urgencyVariant = {
   5: 'critical',
@@ -16,14 +12,38 @@ const urgencyVariant = {
 }
 
 export default function TaskBrowser() {
-  const { tasks, filters, setFilter, clearFilters, fetchTasks } = useTaskStore()
-  const [search, setSearch] = useState('')
-  const [showFilters, setShowFilters] = useState(false)
+  const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [search, setSearch] = useState('')
+  const [category, setCategory] = useState('')
+  const [urgency, setUrgency] = useState('')
 
   useEffect(() => {
-    fetchTasks().finally(() => setLoading(false))
+    fetchTasks()
   }, [])
+
+  const fetchTasks = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch('http://localhost:3001/api/tasks')
+      const data = await res.json()
+      setTasks(data || [])
+    } catch (err) {
+      console.error('Failed to fetch tasks:', err)
+      setError('Failed to load tasks')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filteredTasks = tasks.filter(task => {
+    if (search && !task.title?.toLowerCase().includes(search.toLowerCase())) return false
+    if (category && task.category !== category) return false
+    if (urgency && task.urgency !== parseInt(urgency)) return false
+    return true
+  })
 
   const categoryOptions = [
     { value: '', label: 'All Categories' },
@@ -31,7 +51,6 @@ export default function TaskBrowser() {
     { value: 'Logistics', label: 'Logistics' },
     { value: 'Teaching', label: 'Teaching' },
     { value: 'Construction', label: 'Construction' },
-    { value: 'Tech', label: 'Tech' },
     { value: 'Admin', label: 'Admin' },
   ]
 
@@ -43,12 +62,11 @@ export default function TaskBrowser() {
     { value: '2', label: 'Low' },
   ]
 
-  const filteredTasks = tasks.filter(task => {
-    if (search && !task.title.toLowerCase().includes(search.toLowerCase())) return false
-    if (filters.category && task.category !== filters.category) return false
-    if (filters.urgency && task.urgency !== parseInt(filters.urgency)) return false
-    return true
-  })
+  const clearFilters = () => {
+    setSearch('')
+    setCategory('')
+    setUrgency('')
+  }
 
   return (
     <div className="space-y-6">
@@ -74,113 +92,87 @@ export default function TaskBrowser() {
             className="w-full h-11 pl-9 pr-4 bg-white/[0.03] border border-white/10 rounded-lg text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#D6CCC2]/50 uppercase tracking-wider"
           />
         </div>
-        <Button 
-          variant="ghost" 
-          onClick={() => setShowFilters(!showFilters)}
-          className="gap-2 text-white/60 hover:text-white"
-        >
-          <Filter size={16} />
-          FILTERS
-        </Button>
+        <Select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          options={categoryOptions}
+          className="w-40"
+        />
+        <Select
+          value={urgency}
+          onChange={(e) => setUrgency(e.target.value)}
+          options={urgencyOptions}
+          className="w-40"
+        />
+        {(search || category || urgency) && (
+          <Button variant="ghost" size="sm" onClick={clearFilters}>
+            CLEAR
+          </Button>
+        )}
       </div>
-
-      {/* Filter Panel */}
-      {showFilters && (
-        <Card className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-medium tracking-wide">FILTERS</h3>
-            <button onClick={clearFilters} className="text-xs text-[#D6CCC2] hover:underline">
-              Clear all
-            </button>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <Select
-              label="CATEGORY"
-              value={filters.category}
-              onChange={(e) => setFilter('category', e.target.value)}
-              options={categoryOptions}
-            />
-            <Select
-              label="URGENCY"
-              value={filters.urgency}
-              onChange={(e) => setFilter('urgency', e.target.value)}
-              options={urgencyOptions}
-            />
-          </div>
-        </Card>
-      )}
 
       {/* Results Count */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-white/40 tracking-wide">
           {filteredTasks.length} TASK{filteredTasks.length !== 1 ? 'S' : ''} FOUND
         </p>
+        <Link to="/map">
+          <Button variant="ghost" size="sm" className="gap-2">
+            MAP VIEW <MapPin size={14} />
+          </Button>
+        </Link>
       </div>
 
-      {/* Task Grid */}
-      {loading ? (
-        <div className="grid md:grid-cols-2 gap-4">
-          {[1,2,3,4].map(i => (
+      {/* Error State */}
+      {error && (
+        <Card className="text-center py-12">
+          <p className="text-red-400 mb-4">{error}</p>
+          <Button onClick={fetchTasks}>RETRY</Button>
+        </Card>
+      )}
+
+      {/* Loading State */}
+      {loading && (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1,2,3,4,5,6].map(i => (
             <div key={i} className="h-48 bg-white/[0.02] rounded-xl animate-pulse" />
           ))}
         </div>
-      ) : filteredTasks.length === 0 ? (
-        <Card className="p-12 text-center">
-          <Search size={40} className="text-white/20 mx-auto mb-4" />
+      )}
+
+      {/* Empty State */}
+      {!loading && !error && filteredTasks.length === 0 && (
+        <Card className="text-center py-12">
           <p className="text-white/40 mb-4">No tasks match your filters</p>
-          <Button variant="ghost" onClick={clearFilters} className="text-[#D6CCC2]">
-            Clear filters
-          </Button>
+          <Button variant="ghost" onClick={clearFilters}>CLEAR FILTERS</Button>
         </Card>
-      ) : (
-        <div className="grid md:grid-cols-2 gap-4">
+      )}
+
+      {/* Task Grid */}
+      {!loading && !error && filteredTasks.length > 0 && (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredTasks.map((task) => (
             <Link key={task.id} to={`/tasks/${task.id}`}>
-              <Card className="h-full hover:border-white/20 transition-all group">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex gap-2">
-                    <Badge variant={urgencyVariant[task.urgency]}>{urgencyVariant[task.urgency]}</Badge>
-                    <Badge>{task.category}</Badge>
-                  </div>
-                  <span className="text-xs text-white/30">
-                    {task.priorityScore ? `${Math.round(task.priorityScore * 100)}%` : ''}
-                  </span>
+              <Card hover className="h-full">
+                <div className="flex items-center gap-2 mb-3">
+                  <Badge variant={urgencyVariant[task.urgency]}>{urgencyVariant[task.urgency]}</Badge>
+                  <Badge>{task.category}</Badge>
                 </div>
-                
-                <h3 className="text-lg font-semibold mb-2 group-hover:text-[#D6CCC2] transition-colors">
-                  {task.title}
-                </h3>
-                <p className="text-sm text-white/50 mb-4 line-clamp-2">
-                  {task.description}
-                </p>
-                
-                <div className="flex flex-wrap gap-4 text-xs text-white/40 mb-4">
+                <h3 className="font-semibold mb-2">{task.title}</h3>
+                <p className="text-sm text-white/50 line-clamp-2 mb-4">{task.description}</p>
+                <div className="flex items-center justify-between text-xs text-white/40 mt-auto">
                   <div className="flex items-center gap-1">
                     <MapPin size={12} />
-                    {task.location?.city}, {task.location?.district}
+                    {task.city || 'Delhi'}
                   </div>
                   <div className="flex items-center gap-1">
-                    <Clock size={12} />
-                    {new Date(task.deadline).toLocaleDateString()}
+                    <Users size={12} />
+                    {task.slots_needed - (task.slots_filled || 0)} spots
                   </div>
                 </div>
-                
-                <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
-                  <div className="flex items-center gap-2">
-                    <Users size={14} className="text-white/40" />
-                    <span className="text-sm text-white/50">
-                      {task.slotsFilled}/{task.slotsNeeded}
-                    </span>
-                    <div className="w-20 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-[#D6CCC2] rounded-full"
-                        style={{ width: `${(task.slotsFilled / task.slotsNeeded) * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                  <Button variant="ghost" size="sm" className="text-white/60 group-hover:text-white">
-                    APPLY <ChevronRight size={14} />
-                  </Button>
+                <div className="flex items-center gap-1 text-xs text-white/40 mt-2">
+                  <Clock size={12} />
+                  {task.deadline ? new Date(task.deadline).toLocaleDateString() : 'Flexible'}
                 </div>
               </Card>
             </Link>
