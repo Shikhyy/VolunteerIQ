@@ -9,6 +9,7 @@ import { useTaskStore } from '../../store/taskStore'
 import { useVolunteerStore } from '../../store/volunteerStore'
 import { notifications as notificationsApi } from '../../api/client'
 import Avatar from '../ui/Avatar'
+import AnimatedLogo from '../ui/AnimatedLogo'
 
 const navItems = [
   { path: '/dashboard', label: 'Home', icon: Home, roles: ['volunteer', 'admin'] },
@@ -67,6 +68,21 @@ export default function Layout({ children }) {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  // Keyboard shortcut for search (Cmd+K)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setShowSearch(true)
+      }
+      if (e.key === 'Escape') {
+        setShowSearch(false)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
   const handleLogout = async () => {
     await logout()
     navigate('/login')
@@ -91,24 +107,23 @@ export default function Layout({ children }) {
           <div className="flex items-center gap-3">
             <button 
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="lg:hidden p-2 hover:bg-white/5 rounded-lg transition-colors"
+              className="lg:hidden p-2 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] rounded-lg transition-colors"
             >
-              <MenuIcon size={20} />
+              {mobileOpen ? <X size={20} className="text-white" /> : <MenuIcon size={20} className="text-white" />}
             </button>
             <Link to="/dashboard" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-[#D6CCC2] rounded-full flex items-center justify-center">
-                <span className="font-bold text-sm text-[#0A0A0A]">V</span>
-              </div>
-              <span className="font-semibold text-white tracking-[0.1em] hidden sm:block">VolunteerIQ</span>
+              <AnimatedLogo size="sm" />
             </Link>
           </div>
 
-          {/* Search Button */}
+          {/* Search Button - Improved */}
           <button 
             onClick={() => setShowSearch(true)} 
-            className="hidden md:flex p-2 hover:bg-white/10 rounded-lg transition-colors"
+            className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] rounded-lg transition-colors"
           >
-            <Search size={18} className="text-white/60" />
+            <Search size={16} className="text-white/50" />
+            <span className="text-sm text-white/40 hidden lg:block">Search...</span>
+            <kbd className="hidden lg:flex items-center px-1.5 py-0.5 text-xs text-white/30 bg-white/[0.04] rounded">⌘K</kbd>
           </button>
 
           <div className="flex items-center gap-2">
@@ -134,12 +149,13 @@ export default function Layout({ children }) {
         transition-all duration-300 z-40 flex flex-col backdrop-blur-xl
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
-        {/* Toggle */}
+        {/* Toggle - Improved */}
         <button 
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="hidden lg:flex p-3 hover:bg-white/5 justify-end transition-colors"
+          className="hidden lg:flex items-center justify-between px-3 py-3 hover:bg-white/[0.06] transition-colors border-b border-white/[0.06]"
         >
-          <ChevronLeft size={16} className={`text-white/30 transition-transform ${sidebarCollapsed ? 'rotate-180' : ''}`} />
+          <span className={`text-xs font-medium text-white/40 uppercase tracking-wider ${sidebarCollapsed ? 'hidden' : ''}`}>Menu</span>
+          <ChevronLeft size={18} className={`text-white/50 transition-transform duration-300 ${sidebarCollapsed ? 'rotate-180' : ''}`} />
         </button>
 
         {/* Nav Items */}
@@ -156,14 +172,14 @@ export default function Layout({ children }) {
                 className={`
                   flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200
                   ${isActive 
-                    ? 'bg-white/[0.08] text-[#D6CCC2] shadow-[0_12px_30px_rgba(0,0,0,0.18)]' 
-                    : 'text-white/50 hover:text-white hover:bg-white/[0.04]'
+                    ? 'bg-[#D6CCC2]/10 text-[#D6CCC2] border border-[#D6CCC2]/20 shadow-[0_8px_24px_rgba(0,0,0,0.2)]' 
+                    : 'text-white/60 hover:text-white hover:bg-white/[0.06] border border-transparent'
                   }
                   ${sidebarCollapsed ? 'justify-center' : ''}
                 `}
               >
                 <Icon size={18} />
-                <span className={`text-sm tracking-wide ${sidebarCollapsed ? 'hidden lg:block' : 'block'} whitespace-nowrap`}>
+                <span className={`text-sm font-medium tracking-wide ${sidebarCollapsed ? 'hidden lg:block' : 'block'} whitespace-nowrap`}>
                   {item.label}
                 </span>
                 {showBadge && (
@@ -234,22 +250,26 @@ export default function Layout({ children }) {
         </div>
       </main>
 
-      {/* Search Modal */}
+      {/* Search Modal - Improved with better contrast */}
       {showSearch && (
-        <div className="fixed inset-0 bg-black/50 flex items-start justify-center pt-20 z-50" onClick={() => setShowSearch(false)}>
-          <div className="bg-[#111] rounded-xl p-6 w-full max-w-lg border border-white/10" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/70 flex items-start justify-center pt-20 z-50 backdrop-blur-sm" onClick={() => setShowSearch(false)}>
+          <div className="bg-[#0A0A0A] rounded-2xl p-6 w-full max-w-xl border border-white/10 shadow-[0_24px_80px_rgba(0,0,0,0.5)]" onClick={e => e.stopPropagation()}>
             <form onSubmit={handleSearch}>
-              <input
-                type="text"
-                placeholder="Search tasks..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="w-full h-12 px-4 bg-white/[0.03] border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-[#D6CCC2]/50"
-                autoFocus
-              />
+              <div className="relative">
+                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
+                <input
+                  type="text"
+                  placeholder="Search tasks, volunteers, or locations..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="w-full h-14 pl-12 pr-4 bg-white/[0.04] border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-[#D6CCC2]/50 focus:bg-white/[0.06] text-lg"
+                  autoFocus
+                />
+              </div>
             </form>
-            <div className="mt-4">
-              <p className="text-xs text-white/40">Press Enter to search tasks</p>
+            <div className="mt-4 flex items-center justify-between">
+              <p className="text-sm text-white/40">Press <kbd className="px-1.5 py-0.5 bg-white/[0.08] rounded text-white/60">Enter</kbd> to search</p>
+              <button onClick={() => setShowSearch(false)} className="text-sm text-white/50 hover:text-white">Cancel</button>
             </div>
           </div>
         </div>

@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Check, Eye, EyeOff } from 'lucide-react'
+import { Check, Eye, EyeOff } from 'lucide-react'
 import { Button, Input } from '../components/ui'
 import { useAuthStore } from '../store/authStore'
+import AnimatedLogo from '../components/ui/AnimatedLogo'
 
 export default function SignupPage() {
   const [form, setForm] = useState({ name: '', email: '', password: '' })
@@ -10,21 +11,8 @@ export default function SignupPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [agreed, setAgreed] = useState(false)
-  const [textProgress, setTextProgress] = useState(0)
   const { signup } = useAuthStore()
   const navigate = useNavigate()
-
-  const fullText = "VolunteerIQ"
-
-  useEffect(() => {
-    let progress = 0
-    const interval = setInterval(() => {
-      progress += 1
-      setTextProgress(progress)
-      if (progress >= fullText.length) clearInterval(interval)
-    }, 60)
-    return () => clearInterval(interval)
-  }, [])
 
   const passwordRequirements = [
     { met: form.password.length >= 8, text: 'At least 8 characters' },
@@ -61,15 +49,9 @@ export default function SignupPage() {
     <div className="min-h-screen bg-[#0A0A0A] flex flex-col relative overflow-hidden page-enter">
       <div className="pointer-events-none absolute inset-0 bg-grid opacity-20" />
       <div className="pointer-events-none absolute right-[-4rem] top-32 h-96 w-96 rounded-full bg-[#D6CCC2]/10 blur-3xl float-slow" />
-      {/* Minimal Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50">
         <div className="flex items-center justify-between px-6 py-5">
-          <Link to="/" className="flex items-center gap-2">
-            <span className="font-bold text-xl tracking-[0.2em]">
-              {fullText.slice(0, textProgress)}
-              <span className="inline-block w-2 h-5 bg-[#D6CCC2] ml-0.5 animate-pulse" />
-            </span>
-          </Link>
+          <AnimatedLogo />
           <Link to="/" className="text-sm tracking-[0.1em] text-white/50 hover:text-white transition-colors">
             BACK
           </Link>

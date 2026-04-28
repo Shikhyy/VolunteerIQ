@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { Button, Input } from '../components/ui'
 import { useAuthStore } from '../store/authStore'
+import AnimatedLogo from '../components/ui/AnimatedLogo'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -10,21 +11,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [textProgress, setTextProgress] = useState(0)
   const { login } = useAuthStore()
   const navigate = useNavigate()
-
-  const fullText = "VolunteerIQ"
-
-  useEffect(() => {
-    let progress = 0
-    const interval = setInterval(() => {
-      progress += 1
-      setTextProgress(progress)
-      if (progress >= fullText.length) clearInterval(interval)
-    }, 60)
-    return () => clearInterval(interval)
-  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -47,12 +35,7 @@ export default function LoginPage() {
       <div className="pointer-events-none absolute left-1/2 top-24 h-96 w-96 -translate-x-1/2 rounded-full bg-[#D6CCC2]/10 blur-3xl float-slow" />
       <nav className="fixed top-0 left-0 right-0 z-50">
         <div className="flex items-center justify-between px-6 py-5">
-          <Link to="/" className="flex items-center gap-2">
-            <span className="font-bold text-xl tracking-[0.2em]">
-              {fullText.slice(0, textProgress)}
-              <span className="inline-block w-2 h-5 bg-[#D6CCC2] ml-0.5 animate-pulse" />
-            </span>
-          </Link>
+          <AnimatedLogo />
           <Link to="/" className="text-sm tracking-[0.1em] text-white/50 hover:text-white transition-colors">
             BACK
           </Link>
