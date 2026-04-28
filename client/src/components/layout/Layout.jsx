@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { 
   Home, Users, Map, BarChart3, FileText, Upload, 
-  Settings, LogOut, Menu, X, Search, Bell, Plus, ChevronLeft, Menu as MenuIcon
+  Settings, LogOut, Menu, X, Search, Bell, Plus, ChevronLeft, Menu as MenuIcon, TrendingUp
 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { notifications as notificationsApi } from '../../api/client'
@@ -11,6 +11,7 @@ import Avatar from '../ui/Avatar'
 const navItems = [
   { path: '/dashboard', label: 'Home', icon: Home, roles: ['volunteer', 'admin'] },
   { path: '/tasks', label: 'Tasks', icon: Users, roles: ['volunteer', 'admin'] },
+  { path: '/stats', label: 'My Stats', icon: TrendingUp, roles: ['volunteer', 'admin'] },
   { path: '/map', label: 'Map', icon: Map, roles: ['volunteer', 'admin'] },
   { path: '/notifications', label: 'Notifications', icon: Bell, roles: ['volunteer', 'admin'] },
   { path: '/admin', label: 'Dashboard', icon: BarChart3, roles: ['admin'] },

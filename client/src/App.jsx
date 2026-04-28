@@ -27,6 +27,7 @@ const AdminVolunteerTable = lazy(() => import('./pages/admin/AdminVolunteerTable
 const CSVImportPage = lazy(() => import('./pages/admin/CSVImportPage'))
 const AnalyticsDashboard = lazy(() => import('./pages/admin/AnalyticsDashboard'))
 const MapView = lazy(() => import('./pages/map/MapView'))
+const VolunteerStats = lazy(() => import('./pages/volunteers/VolunteerStats'))
 
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-[400px]">
@@ -111,6 +112,9 @@ export default function App() {
         } />
         <Route path="/notifications" element={
           isAuthenticated ? <Layout><Notifications /></Layout> : <Navigate to="/login" />
+        } />
+        <Route path="/stats" element={
+          isAuthenticated ? <Layout><Suspense fallback={<PageLoader />}><VolunteerStats /></Suspense></Layout> : <Navigate to="/login" />
         } />
       </Routes>
     </BrowserRouter>

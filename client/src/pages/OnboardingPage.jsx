@@ -183,6 +183,33 @@ export default function OnboardingPage() {
       <h1 className="text-2xl font-bold text-[#1A1A1A] mb-2">Complete Your Profile</h1>
       <p className="text-[#6B6B6B] mb-8">Help us match you with the right opportunities</p>
 
+      {/* Profile Completion Progress */}
+      {(() => {
+        const totalSteps = 4
+        const completedSteps = [
+          form.name,
+          form.skills.length > 0,
+          form.availability.length > 0,
+          form.city
+        ].filter(Boolean).length
+        const progress = (completedSteps / totalSteps) * 100
+
+        return (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-white/60">Profile Completion</span>
+              <span className="text-sm text-[#D6CCC2]">{Math.round(progress)}%</span>
+            </div>
+            <div className="h-2 bg-white/[0.1] rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-[#D6CCC2] rounded-full transition-all duration-500" 
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+        )
+      })()}
+
       {/* Progress */}
       <div className="flex items-center justify-between mb-8">
         {steps.map((step, idx) => {
