@@ -7,18 +7,12 @@ const { supabase, isConfigured } = require('../services/supabase')
 router.get('/', requireAuth, async (req, res) => {
   let tasks = []
   
-  console.log('DEV_MODE:', DEV_MODE)
-  console.log('isConfigured:', isConfigured)
-  
   try {
     if (DEV_MODE || !isConfigured) {
       tasks = loadJSON('tasks.json')
     } else {
-      console.log('Querying Supabase...')
       const { data, error } = await supabase.from('tasks').select('*')
-      console.log('Supabase response:', { data, error })
       if (error) {
-        console.error('Supabase error:', error.message)
         return res.status(500).json({ error: error.message })
       }
       tasks = data || []
