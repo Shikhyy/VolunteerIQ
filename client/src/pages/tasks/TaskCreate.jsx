@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { MapPin, Clock, Users, ChevronLeft, Plus, X } from 'lucide-react'
 import { Card, Button, Input, Select, Textarea } from '../../components/ui'
 import { useTaskStore } from '../../store/taskStore'
@@ -27,7 +27,9 @@ const skillOptions = [
 
 export default function TaskCreate() {
   const navigate = useNavigate()
-  const { addTask } = useTaskStore()
+  const [searchParams] = useSearchParams()
+  const editId = searchParams.get('edit')
+  const { tasks, addTask, updateTask } = useTaskStore()
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({
     title: '',
@@ -39,6 +41,28 @@ export default function TaskCreate() {
     slotsNeeded: 1,
     deadline: '',
   })
+
+  useEffect(() => {
+    if (editId && tasks.length > 0) {
+      const task = tasks.find(t => t.id === editId)
+      if (task) {
+        setForm({
+          title: task.title || '',
+          description: task.description || '',
+          category: task.category || '',
+          urgency: task.urgency || 3,
+          location: { 
+            address: task.location?.address || '', 
+            city: task.location?.city || '', 
+            district: task.location?.district || '' 
+          },
+          requiredSkills: task.requiredSkills || [],
+          slotsNeeded: task.slotsNeeded || 1,
+          deadline: task.deadline ? task.deadline.split('T')[0] : '',
+        })
+      }
+    }
+  }, [editId, tasks])
 
   const toggleSkill = (skill) => {
     setForm(prev => ({
@@ -66,12 +90,19 @@ export default function TaskCreate() {
     e.preventDefault()
     setLoading(true)
     await new Promise(resolve => setTimeout(resolve, 500))
-    addTask({
+    
+    const taskData = {
       ...form,
       status: 'open',
       slotsFilled: 0,
       priorityScore: (form.urgency / 5) * 0.4,
-    })
+    }
+    
+    if (editId) {
+      updateTask(editId, taskData)
+    } else {
+      addTask(taskData)
+    }
     navigate('/admin/tasks')
   }
 
@@ -82,8 +113,8 @@ export default function TaskCreate() {
           <ChevronLeft size={20} />
         </button>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Create Task<span className="text-[#D6CCC2]">.</span></h1>
-          <p className="text-white/50 mt-1">Add a new volunteer opportunity</p>
+          <h1 className="text-2xl font-bold tracking-tight">{editId ? 'Edit Task' : 'Create Task'}<span className="text-[#D6CCC2]">.</span></h1>
+          <p className="text-white/50 mt-1">{editId ? 'Update an existing task' : 'Add a new volunteer opportunity'}</p>
         </div>
       </div>
 
@@ -199,7 +230,7 @@ export default function TaskCreate() {
               CANCEL
             </Button>
             <Button type="submit" disabled={!canSubmit() || loading} className="bg-[#D6CCC2] text-[#0A0A0A]">
-              {loading ? 'CREATING...' : 'CREATE TASK'}
+              {loading ? (editId ? 'UPDATING...' : 'CREATING...') : (editId ? 'UPDATE TASK' : 'CREATE TASK')}
             </Button>
           </div>
         </Card>
