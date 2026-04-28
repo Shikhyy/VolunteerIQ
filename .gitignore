@@ -38,6 +38,7 @@ build
 *.md
 !README.md
 !client/README.md
+!LICENSE
 
 # Cache
 .cache
