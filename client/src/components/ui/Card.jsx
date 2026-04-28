@@ -1,4 +1,4 @@
-const Card = ({ children, className = '', padding = 'lg', hover, onClick }) => {
+const Card = ({ children, className = '', padding = 'lg', hover = false, onClick }) => {
   const paddingClasses = {
     sm: 'p-4',
     md: 'p-5',
@@ -11,7 +11,7 @@ const Card = ({ children, className = '', padding = 'lg', hover, onClick }) => {
       className={`
         bg-[#111] rounded-xl border border-white/[0.06]
         ${paddingClasses[padding]}
-        ${hover ? 'hover:border-white/[0.12] transition-all duration-300 cursor-pointer' : ''}
+        ${hover ? 'hover:border-white/[0.15] hover:bg-[#151515] transition-all duration-300 cursor-pointer group' : ''}
         ${onClick ? 'cursor-pointer' : ''}
         ${className}
       `}

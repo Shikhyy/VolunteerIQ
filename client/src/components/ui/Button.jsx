@@ -1,10 +1,10 @@
 import { forwardRef } from 'react'
 
 const variants = {
-  primary: 'bg-[#D6CCC2] text-[#0A0A0A] hover:bg-[#E3D5CA] active:scale-[0.98] shadow-lg',
+  primary: 'bg-[#D6CCC2] text-[#0A0A0A] hover:bg-[#E3D5CA] active:scale-[0.98] shadow-lg hover:shadow-xl',
   secondary: 'bg-transparent border border-white/20 text-white hover:bg-white/10 active:scale-[0.98]',
-  ghost: 'bg-transparent text-white/60 hover:text-white hover:bg-white/[0.08] active:scale-[0.98]',
-  danger: 'bg-red-500 text-white hover:bg-red-600 active:scale-[0.98]',
+  ghost: 'bg-transparent text-white/60 hover:text-white hover:bg-white/[0.08] active:scale-[0.98] border border-transparent',
+  danger: 'bg-red-500/90 text-white hover:bg-red-600 active:scale-[0.98]',
 }
 
 const sizes = {
@@ -29,7 +29,7 @@ const Button = forwardRef(({
       className={`
         inline-flex items-center justify-center gap-2 font-medium rounded-lg
         transition-all duration-200 ease-out
-        focus:outline-none focus:ring-2 focus:ring-[#D6CCC2] focus:ring-offset-2 focus:ring-offset-[#0A0A0A]
+        focus:outline-none focus:ring-2 focus:ring-[#D6CCC2]/40 focus:ring-offset-2 focus:ring-offset-[#0A0A0A]
         disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:active:scale-100
         ${variants[variant]}
         ${sizes[size]}

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Layers, Search, Filter, X, MapPin, Users, Clock } from 'lucide-react'
 import { Card, Badge, Button } from '../../components/ui'
 import { useTaskStore } from '../../store/taskStore'
@@ -12,8 +12,9 @@ const urgencyVariant = {
 }
 
 export default function MapView() {
-  const { tasks } = useTaskStore()
+  const { tasks, fetchTasks } = useTaskStore()
   const [selectedTask, setSelectedTask] = useState(null)
+  const [loading, setLoading] = useState(true)
   const [layers, setLayers] = useState({
     tasks: true,
     volunteers: true,
@@ -23,6 +24,10 @@ export default function MapView() {
     category: '',
     urgency: '',
   })
+
+  useEffect(() => {
+    fetchTasks().finally(() => setLoading(false))
+  }, [])
 
   const toggleLayer = (layer) => {
     setLayers(prev => ({ ...prev, [layer]: !prev[layer] }))
