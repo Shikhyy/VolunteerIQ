@@ -49,6 +49,9 @@ export default function SignupPage() {
     try {
       await signup(form.email, form.password, form.name)
       navigate('/dashboard')
+    } catch (err) {
+      const msg = err.response?.data?.error || err.message || 'Signup failed'
+      setError(msg)
     } finally {
       setLoading(false)
     }
