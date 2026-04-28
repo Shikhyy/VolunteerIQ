@@ -40,6 +40,9 @@ router.get('/:id', requireAuth, (req, res) => {
   } catch (err) {
     console.error('Error loading volunteers:', err.message)
   }
+  if (volunteers.length === 0) {
+    return res.status(500).json({ error: 'Failed to load volunteers' })
+  }
   const volunteer = volunteers.find(v => v.id === req.params.id)
 
   if (!volunteer) {
@@ -49,12 +52,15 @@ router.get('/:id', requireAuth, (req, res) => {
   res.json(volunteer)
 })
 
-router.put('/:id', requireAuth, (req, res) => {
+router.put('/:id', requireAuth, requireAdmin, (req, res) => {
   let volunteers = []
   try {
     volunteers = DEV_MODE ? loadJSON('volunteers.json') : []
   } catch (err) {
     console.error('Error loading volunteers:', err.message)
+    return res.status(500).json({ error: 'Failed to load volunteers' })
+  }
+  if (volunteers.length === 0) {
     return res.status(500).json({ error: 'Failed to load volunteers' })
   }
   const index = volunteers.findIndex(v => v.id === req.params.id)
@@ -63,7 +69,15 @@ router.put('/:id', requireAuth, (req, res) => {
     return res.status(404).json({ error: 'Volunteer not found' })
   }
 
-  volunteers[index] = { ...volunteers[index], ...req.body, updatedAt: new Date().toISOString() }
+  const allowedFields = ['name', 'email', 'skills', 'status', 'availability']
+  const updates = {}
+  for (const field of allowedFields) {
+    if (req.body[field] !== undefined) {
+      updates[field] = req.body[field]
+    }
+  }
+
+  volunteers[index] = { ...volunteers[index], ...updates, updatedAt: new Date().toISOString() }
 
   if (DEV_MODE) {
     try {

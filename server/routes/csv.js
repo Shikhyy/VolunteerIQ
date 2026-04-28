@@ -66,9 +66,18 @@ router.get('/export', requireAuth, (req, res) => {
   const headers = ['title', 'description', 'category', 'urgency', 'date', 'location', 'slots', 'status']
   const csvRows = [headers.join(',')]
 
+  const sanitize = (val) => {
+    if (val == null) return ''
+    const str = String(val)
+    if (str.match(/^[=+\-@\t\r\n]/)) {
+      return `''${str}`
+    }
+    return str
+  }
+
   for (const task of tasks) {
     const row = headers.map(h => {
-      const val = task[h] || ''
+      const val = sanitize(task[h])
       return val.includes(',') ? `"${val}"` : val
     })
     csvRows.push(row.join(','))

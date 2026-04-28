@@ -14,12 +14,14 @@ import OnboardingPage from './pages/OnboardingPage'
 import VolunteerDashboard from './pages/volunteers/VolunteerDashboard'
 import TaskBrowser from './pages/tasks/TaskBrowser'
 import TaskCreate from './pages/tasks/TaskCreate'
+import TaskDetail from './pages/tasks/TaskDetail'
 import MapView from './pages/map/MapView'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminTaskManager from './pages/admin/AdminTaskManager'
 import AdminVolunteerTable from './pages/admin/AdminVolunteerTable'
 import CSVImportPage from './pages/admin/CSVImportPage'
 import ProfilePage from './pages/ProfilePage'
+import Notifications from './pages/notifications/Notifications'
 
 export default function App() {
   const { user, loading, initAuth } = useAuthStore()
@@ -63,6 +65,9 @@ export default function App() {
         <Route path="/tasks/create" element={
           isAuthenticated ? <Layout><TaskCreate /></Layout> : <Navigate to="/login" />
         } />
+        <Route path="/tasks/:id" element={
+          isAuthenticated ? <Layout><TaskDetail /></Layout> : <Navigate to="/login" />
+        } />
         <Route path="/map" element={
           isAuthenticated ? <Layout><MapView /></Layout> : <Navigate to="/login" />
         } />
@@ -80,6 +85,9 @@ export default function App() {
         } />
         <Route path="/profile" element={
           isAuthenticated ? <Layout><ProfilePage /></Layout> : <Navigate to="/login" />
+        } />
+        <Route path="/notifications" element={
+          isAuthenticated ? <Layout><Notifications /></Layout> : <Navigate to="/login" />
         } />
       </Routes>
     </BrowserRouter>

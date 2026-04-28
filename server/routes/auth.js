@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const { DEV_MODE, loadJSON, saveJSON } = require('../middleware/devMode')
+const { requireAuth } = require('../middleware/auth')
 
 router.post('/login', (req, res) => {
   const { email, password } = req.body
@@ -51,7 +52,7 @@ router.post('/logout', (req, res) => {
   res.json({ message: 'Logged out' })
 })
 
-router.get('/me', (req, res) => {
+router.get('/me', requireAuth, (req, res) => {
   const token = req.headers.authorization?.replace('Bearer ', '')
 
   if (DEV_MODE && token?.startsWith('dev-token-')) {

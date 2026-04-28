@@ -32,11 +32,13 @@ router.put('/:id/read', requireAuth, (req, res) => {
     console.error('Error loading notifications:', err.message)
     return res.status(500).json({ error: 'Failed to load notifications' })
   }
-  const index = notifications.findIndex(n => n.id === req.params.id)
+  const userId = req.user?.id
+  const notification = notifications.find(n => n.id === req.params.id && (n.userId === userId || n.userId === undefined))
 
-  if (index === -1) {
+  if (!notification) {
     return res.status(404).json({ error: 'Notification not found' })
   }
+  const index = notifications.findIndex(n => n.id === req.params.id)
 
   notifications[index].read = true
   notifications[index].readAt = new Date().toISOString()
@@ -64,11 +66,11 @@ router.put('/read-all', requireAuth, (req, res) => {
 
   const userId = req.user?.id
   let updated = 0
-  notifications = notifications.map(n => {
+  const original = [...notifications]
+  notifications = notifications.map((n, i) => {
     if ((n.userId === userId || n.userId === undefined) && !n.read) {
-      n.read = true
-      n.readAt = new Date().toISOString()
       updated++
+      return { ...n, read: true, readAt: new Date().toISOString() }
     }
     return n
   })
