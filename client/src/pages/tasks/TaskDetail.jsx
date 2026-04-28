@@ -37,14 +37,15 @@ function formatDeadline(deadline) {
 export default function TaskDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { tasks, selectTask } = useTaskStore()
+  const { tasks, selectTask, deleteTask, setTasks } = useTaskStore()
   const { matchResults, setMatchResults } = useVolunteerStore()
   const { user, role } = useAuthStore()
   const { showToast } = useToast()
   
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [recalculating, setRecalculating] = useState(false)
   const [applying, setApplying] = useState(false)
+  const [loadError, setLoadError] = useState('')
   
   const task = tasks.find(t => String(t.id) === String(id))
   const matches = matchResults[id] || []
@@ -55,8 +56,45 @@ export default function TaskDetail() {
   useEffect(() => {
     if (task) {
       selectTask(task)
+      setLoading(false)
+      return
     }
-  }, [task, selectTask])
+
+    let active = true
+    const fetchTask = async () => {
+      setLoading(true)
+      setLoadError('')
+      try {
+        const { data } = await tasksApi.get(id)
+        if (!active) return
+        const nextTask = data?.data || data
+        if (nextTask) {
+          setTasks(prev => {
+            const existingIndex = prev.findIndex(item => String(item.id) === String(nextTask.id))
+            if (existingIndex >= 0) {
+              return prev.map(item => String(item.id) === String(nextTask.id) ? nextTask : item)
+            }
+            return [...prev, nextTask]
+          })
+          selectTask(nextTask)
+        }
+      } catch (error) {
+        console.error('Failed to load task:', error)
+        if (active) {
+          setLoadError('Task not found')
+        }
+      } finally {
+        if (active) {
+          setLoading(false)
+        }
+      }
+    }
+
+    fetchTask()
+    return () => {
+      active = false
+    }
+  }, [id, task, selectTask, setTasks])
 
   const handleRecalculate = async () => {
     setRecalculating(true)
@@ -72,24 +110,50 @@ export default function TaskDetail() {
 
   const handleApply = () => {
     setApplying(true)
-    setTimeout(() => {
-      setApplying(false)
-      showToast('Application submitted successfully!', 'success')
-    }, 1000)
+    tasksApi.apply(id)
+      .then(({ data }) => {
+        const updatedTask = data?.data || data
+        if (updatedTask) {
+          setTasks(prev => prev.map(item => String(item.id) === String(updatedTask.id) ? updatedTask : item))
+          selectTask(updatedTask)
+        }
+        showToast('Application submitted successfully!', 'success')
+      })
+      .catch((error) => {
+        console.error('Failed to apply for task:', error)
+        showToast('Failed to submit application', 'error')
+      })
+      .finally(() => {
+        setApplying(false)
+      })
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this task?')) {
-      console.log('Delete task:', id)
-      navigate('/tasks')
+      try {
+        await deleteTask(id)
+        setTasks(prev => prev.filter(taskItem => String(taskItem.id) !== String(id)))
+        navigate('/tasks')
+      } catch (error) {
+        console.error('Failed to delete task:', error)
+        showToast('Failed to delete task', 'error')
+      }
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <Spinner />
+      </div>
+    )
   }
 
   if (!task) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
         <AlertCircle size={48} className="text-white/20 mb-4" />
-        <p className="text-white/50 mb-4">Task not found</p>
+        <p className="text-white/50 mb-4">{loadError || 'Task not found'}</p>
         <Link to="/tasks">
           <Button variant="ghost">Back to Tasks</Button>
         </Link>
@@ -100,7 +164,7 @@ export default function TaskDetail() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between animate-fade-in">
         <div className="flex items-center gap-4">
           <Link to="/tasks">
             <Button variant="ghost" size="sm" icon={ArrowLeft}>
@@ -142,7 +206,7 @@ export default function TaskDetail() {
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Description Card */}
-          <Card>
+          <Card className="animate-slide-up">
             <h2 className="text-lg font-semibold mb-4 tracking-wide">DESCRIPTION</h2>
             <p className="text-white/70 leading-relaxed">
               {task.description}
@@ -160,7 +224,7 @@ export default function TaskDetail() {
           </Card>
 
           {/* AI Recommended Volunteers */}
-          <Card>
+          <Card className="animate-slide-up" style={{animationDelay: '100ms'}}>
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
                 <Sparkles size={18} className="text-[#D6CCC2]" />
@@ -189,11 +253,12 @@ export default function TaskDetail() {
                 <p className="text-white/50">No matching volunteers found</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-4 animate-stagger">
                 {matches.map((match, index) => (
                   <div 
                     key={match.volunteerId}
-                    className="flex items-center gap-4 p-4 bg-white/[0.03] rounded-lg hover:bg-white/[0.05] transition-colors"
+                    className="flex items-center gap-4 p-4 bg-white/[0.03] rounded-lg hover:bg-white/[0.05] transition-colors animate-slide-up"
+                    style={{animationDelay: `${index * 50}ms`}}
                   >
                     <div className="text-lg font-bold text-white/30 w-6">
                       #{index + 1}
@@ -227,7 +292,7 @@ export default function TaskDetail() {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Task Details */}
-          <Card>
+          <Card className="animate-slide-up" style={{animationDelay: '200ms'}}>
             <h3 className="text-sm font-semibold text-white/40 mb-4 tracking-wide">
               TASK DETAILS
             </h3>
@@ -287,7 +352,7 @@ export default function TaskDetail() {
 
           {/* Action Button */}
           <Button 
-            className="w-full" 
+            className="w-full shine" 
             size="lg"
             icon={CheckCircle}
             loading={applying}

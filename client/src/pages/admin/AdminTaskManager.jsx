@@ -54,20 +54,20 @@ export default function AdminTaskManager() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between animate-fade-in">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Tasks<span className="text-[#D6CCC2]">.</span></h1>
           <p className="text-white/50 mt-1">Manage all volunteer tasks</p>
         </div>
         <Link to="/tasks/create">
-          <Button className="bg-[#D6CCC2] text-[#0A0A0A] gap-2">
+          <Button className="bg-[#D6CCC2] text-[#0A0A0A] gap-2 shine">
             <Plus size={16} /> CREATE
           </Button>
         </Link>
       </div>
 
       {/* Filters */}
-      <Card className="p-4">
+      <Card className="p-4 animate-slide-up">
         <div className="flex flex-wrap gap-4">
           <div className="relative flex-1 min-w-[200px]">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
@@ -103,9 +103,9 @@ export default function AdminTaskManager() {
                 <th className="text-left text-xs font-medium text-white/50 tracking-wider px-6 py-3"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.06]">
-              {filteredTasks.map((task) => (
-                <tr key={task.id} className="hover:bg-white/[0.02]">
+            <tbody className="divide-y divide-white/[0.06] animate-stagger">
+              {filteredTasks.map((task, idx) => (
+                <tr key={task.id} className="hover:bg-white/[0.02] animate-fade-in" style={{animationDelay: `${idx * 50}ms`}}>
                   <td className="px-6 py-4">
                     <p className="font-medium text-white">{task.title}</p>
                   </td>

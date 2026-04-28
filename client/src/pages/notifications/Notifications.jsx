@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Users, Clock, AlertCircle, CheckCircle, MapPin, Bell, Trash2 } from 'lucide-react'
 import { Card, Button, Badge } from '../../components/ui'
+import { notifications as notificationsApi } from '../../api/client'
 
 const NOTIFICATION_ICONS = {
   task_assigned: Users,
@@ -23,16 +24,11 @@ export default function Notifications() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('http://localhost:3001/api/notifications')
-      if (res.ok) {
-        const data = await res.json()
-        setNotifications(data || [])
-      } else {
-        setNotifications([])
-      }
+      const { data } = await notificationsApi.getAll()
+      setNotifications(data || [])
     } catch (err) {
       console.error('Failed to fetch notifications:', err)
-      setNotifications([])
+      setError('Failed to load notifications')
     } finally {
       setLoading(false)
     }
@@ -42,7 +38,7 @@ export default function Notifications() {
 
   const handleMarkRead = async (id) => {
     try {
-      await fetch(`http://localhost:3001/api/notifications/${id}/read`, { method: 'PUT' })
+      await notificationsApi.markRead(id)
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
     } catch (err) {
       console.error('Failed to mark read:', err)
@@ -51,7 +47,7 @@ export default function Notifications() {
 
   const handleMarkAllRead = async () => {
     try {
-      await fetch('http://localhost:3001/api/notifications/read-all', { method: 'PUT' })
+      await notificationsApi.markAllRead()
       setNotifications(prev => prev.map(n => ({ ...n, read: true })))
     } catch (err) {
       console.error('Failed to mark all read:', err)

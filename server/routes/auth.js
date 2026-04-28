@@ -1,13 +1,77 @@
 const express = require('express')
 const router = express.Router()
 const { createClient } = require('@supabase/supabase-js')
+const crypto = require('crypto')
+const { DEV_MODE, loadJSON, saveJSON } = require('../middleware/devMode')
 
 const supabaseUrl = process.env.SUPABASE_URL
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+const supabase = supabaseUrl && supabaseServiceKey ? createClient(supabaseUrl, supabaseServiceKey) : null
+const supabaseAdmin = supabaseUrl && supabaseServiceKey ? createClient(supabaseUrl, supabaseServiceKey, {
   auth: { autoRefreshToken: false, persistSession: false }
+}) : null
+
+const LOCAL_USERS_FILE = 'auth-users.json'
+
+const normalizeLocalUser = (user = {}) => ({
+  id: user.id || `user-${Date.now()}`,
+  email: user.email,
+  name: user.name || user.displayName || user.email,
+  role: user.role || 'volunteer',
+  passwordHash: user.passwordHash || '',
+  photoURL: user.photoURL || null,
 })
+
+const hashPassword = (password) => crypto.createHash('sha256').update(String(password)).digest('hex')
+
+const loadLocalUsers = () => {
+  try {
+    return loadJSON(LOCAL_USERS_FILE)
+  } catch (error) {
+    console.error('Failed to load local users:', error.message)
+    return []
+  }
+}
+
+const saveLocalUsers = (users) => {
+  saveJSON(LOCAL_USERS_FILE, users)
+}
+
+const getLocalTokenUser = (token) => {
+  if (!token || !token.startsWith('local-')) {
+    return null
+  }
+  const users = loadLocalUsers()
+  const userId = token.replace('local-', '')
+  return users.find(user => String(user.id) === String(userId)) || null
+}
+
+const syncVolunteerProfile = async (user) => {
+  if (DEV_MODE) {
+    const volunteers = loadJSON('volunteers.json')
+    const index = volunteers.findIndex(volunteer => String(volunteer.id) === String(user.id))
+    const profile = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phone: volunteers[index]?.phone || '',
+      skills: volunteers[index]?.skills || [],
+      availability: volunteers[index]?.availability || [],
+      status: volunteers[index]?.status || 'active',
+      tasksCompleted: volunteers[index]?.tasksCompleted || 0,
+      hoursVolunteered: volunteers[index]?.hoursVolunteered || volunteers[index]?.hoursContributed || 0,
+      joinedAt: volunteers[index]?.joinedAt || new Date().toISOString(),
+    }
+
+    if (index >= 0) {
+      volunteers[index] = profile
+    } else {
+      volunteers.unshift(profile)
+    }
+
+    saveJSON('volunteers.json', volunteers)
+  }
+}
 
 router.post('/login', async (req, res) => {
   const { email, password } = req.body
@@ -17,6 +81,26 @@ router.post('/login', async (req, res) => {
   }
 
   try {
+    if (!supabaseUrl || !supabaseServiceKey) {
+      const users = loadLocalUsers()
+      const user = users.find(entry => entry.email.toLowerCase() === String(email).toLowerCase())
+
+      if (!user || user.passwordHash !== hashPassword(password)) {
+        return res.status(401).json({ error: 'Invalid email or password' })
+      }
+
+      return res.json({
+        token: `local-${user.id}`,
+        user: {
+          uid: user.id,
+          email: user.email,
+          displayName: user.name,
+          photoURL: user.photoURL,
+          role: user.role || 'volunteer'
+        }
+      })
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
@@ -60,6 +144,37 @@ router.post('/register', async (req, res) => {
   }
 
   try {
+    if (!supabaseUrl || !supabaseServiceKey) {
+      const users = loadLocalUsers()
+      const existing = users.find(entry => entry.email.toLowerCase() === String(email).toLowerCase())
+
+      if (existing) {
+        return res.status(400).json({ error: 'Email already in use' })
+      }
+
+      const user = normalizeLocalUser({
+        id: `local-${Date.now()}`,
+        email,
+        name,
+        role: 'volunteer',
+        passwordHash: hashPassword(password)
+      })
+
+      users.push(user)
+      saveLocalUsers(users)
+      await syncVolunteerProfile(user)
+
+      return res.status(201).json({
+        token: `local-${user.id}`,
+        user: {
+          uid: user.id,
+          email: user.email,
+          displayName: user.name,
+          role: user.role
+        }
+      })
+    }
+
     // Use admin API to create user without email confirmation
     const { data: user, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email,
@@ -106,7 +221,9 @@ router.post('/register', async (req, res) => {
 
 router.post('/logout', async (req, res) => {
   try {
-    await supabase.auth.signOut()
+    if (supabaseUrl && supabaseServiceKey) {
+      await supabase.auth.signOut()
+    }
   } catch (e) {}
   res.json({ message: 'Logged out' })
 })
@@ -120,6 +237,23 @@ router.get('/me', async (req, res) => {
   }
 
   try {
+    if (token.startsWith('local-')) {
+      const user = getLocalTokenUser(token)
+      if (!user) {
+        return res.status(401).json({ error: 'Invalid token' })
+      }
+
+      return res.json({
+        user: {
+          uid: user.id,
+          email: user.email,
+          displayName: user.name,
+          photoURL: user.photoURL,
+          role: user.role || 'volunteer'
+        }
+      })
+    }
+
     const { data: { user }, error } = await supabase.auth.getUser(token)
 
     if (error || !user) {

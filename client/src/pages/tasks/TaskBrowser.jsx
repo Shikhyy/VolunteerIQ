@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Search, Filter, MapPin, Users, Clock, ChevronRight } from 'lucide-react'
 import { Card, Badge, Button, Input, Select } from '../../components/ui'
+import { tasks as tasksApi } from '../../api/client'
 
 const urgencyVariant = {
   5: 'critical',
@@ -27,8 +28,7 @@ export default function TaskBrowser() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('http://localhost:3001/api/tasks')
-      const data = await res.json()
+      const { data } = await tasksApi.list()
       setTasks(data || [])
     } catch (err) {
       console.error('Failed to fetch tasks:', err)
@@ -71,7 +71,7 @@ export default function TaskBrowser() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
+      <div className="animate-fade-in">
         <h1 className="text-3xl font-bold tracking-tight">
           Tasks<span className="text-[#D6CCC2]">.</span>
         </h1>
@@ -133,9 +133,9 @@ export default function TaskBrowser() {
 
       {/* Loading State */}
       {loading && (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[1,2,3,4,5,6].map(i => (
-            <div key={i} className="h-48 bg-white/[0.02] rounded-xl animate-pulse" />
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 animate-stagger">
+          {[1,2,3,4,5,6].map((i) => (
+            <div key={i} className="h-48 bg-white/[0.02] rounded-xl animate-pulse animate-slide-up" style={{animationDelay: `${(i-1) * 100}ms`}} />
           ))}
         </div>
       )}
@@ -150,10 +150,10 @@ export default function TaskBrowser() {
 
       {/* Task Grid */}
       {!loading && !error && filteredTasks.length > 0 && (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredTasks.map((task) => (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 animate-stagger">
+          {filteredTasks.map((task, idx) => (
             <Link key={task.id} to={`/tasks/${task.id}`}>
-              <Card hover className="h-full">
+              <Card hover className="h-full animate-slide-up" style={{animationDelay: `${idx * 50}ms`}}>
                 <div className="flex items-center gap-2 mb-3">
                   <Badge variant={urgencyVariant[task.urgency]}>{urgencyVariant[task.urgency]}</Badge>
                   <Badge>{task.category}</Badge>

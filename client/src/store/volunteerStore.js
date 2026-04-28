@@ -28,7 +28,7 @@ export const useVolunteerStore = create((set) => ({
   fetchProfile: async () => {
     try {
       const { data } = await volunteersApi.getMe()
-      set({ myProfile: data })
+      set({ myProfile: data.user || data })
     } catch (error) {
       console.error('Failed to fetch profile:', error)
     }
@@ -37,8 +37,8 @@ export const useVolunteerStore = create((set) => ({
   updateProfile: async (updates) => {
     try {
       const { data } = await volunteersApi.updateMe(updates)
-      set({ myProfile: data })
-      return data
+      set({ myProfile: data.user || data })
+      return data.user || data
     } catch (error) {
       console.error('Failed to update profile:', error)
       throw error

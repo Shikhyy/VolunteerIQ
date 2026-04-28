@@ -56,9 +56,12 @@ export default function LandingPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A]">
+    <div className="min-h-screen bg-[#0A0A0A] relative overflow-hidden page-enter">
+      <div className="pointer-events-none absolute inset-0 bg-grid opacity-20" />
+      <div className="pointer-events-none absolute -left-20 top-24 h-80 w-80 rounded-full bg-[#D6CCC2]/10 blur-3xl float-slow" />
+      <div className="pointer-events-none absolute right-0 top-[24rem] h-96 w-96 rounded-full bg-white/[0.04] blur-3xl float-slower" />
       {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-[#0A0A0A]/95 backdrop-blur-md border-b border-white/[0.06]' : ''}`}>
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-[#0A0A0A]/85 backdrop-blur-xl border-b border-white/[0.08] shadow-[0_10px_30px_rgba(0,0,0,0.3)]' : ''}`}>
         <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <div className="w-10 h-10 bg-[#D6CCC2] rounded-xl flex items-center justify-center">
@@ -73,10 +76,10 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-3">
             <Link to="/login">
-              <Button variant="ghost" className="text-white/70">LOGIN</Button>
+              <Button variant="ghost" className="text-white/70 shine">LOGIN</Button>
             </Link>
             <Link to="/signup">
-              <Button className="bg-[#D6CCC2] text-[#0A0A0A] hover:bg-[#E3D5CA]">GET STARTED</Button>
+              <Button className="bg-[#D6CCC2] text-[#0A0A0A] hover:bg-[#E3D5CA] shine">GET STARTED</Button>
             </Link>
           </div>
         </div>
@@ -84,33 +87,32 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <section className="relative pt-40 pb-32 px-6 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#D6CCC2]/10 via-transparent to-transparent" />
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#D6CCC2]/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#D6CCC2]/5 rounded-full blur-3xl" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(214,204,194,0.18),transparent_40%)]" />
+        <div className="absolute top-28 left-1/2 h-[22rem] w-[22rem] -translate-x-1/2 rounded-full bg-[#D6CCC2]/6 blur-3xl" />
         
         <div className="max-w-5xl mx-auto text-center relative">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/[0.03] border border-white/[0.06] rounded-full mb-8">
+          <div className="inline-flex items-center gap-2 px-4 py-2 surface-glass rounded-full mb-8 animate-fade-in">
             <Sparkles size={14} className="text-[#D6CCC2]" />
             <span className="text-xs tracking-widest text-white/60">AI-POWERED VOLUNTEER COORDINATION</span>
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-tight">
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-tight animate-slide-up">
             Connect. Contribute.<span className="text-[#D6CCC2]">Impact.</span>
           </h1>
           
-          <p className="text-xl text-white/50 max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-xl text-white/50 max-w-2xl mx-auto mb-10 leading-relaxed animate-slide-up" style={{ animationDelay: '80ms' }}>
             The intelligent platform that matches volunteers with meaningful opportunities. 
             Save time, increase engagement, and maximize your social impact.
           </p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up" style={{ animationDelay: '140ms' }}>
             <Link to="/signup">
-              <Button className="bg-[#D6CCC2] text-[#0A0A0A] hover:bg-[#E3D5CA] text-lg px-8 py-4">
+              <Button className="bg-[#D6CCC2] text-[#0A0A0A] hover:bg-[#E3D5CA] text-lg px-8 py-4 shine">
                 START FOR FREE <ArrowRight size={20} className="ml-2" />
               </Button>
             </Link>
             <Link to="/login">
-              <Button variant="ghost" className="text-white/60 hover:text-white text-lg px-8 py-4">
+              <Button variant="ghost" className="text-white/60 hover:text-white text-lg px-8 py-4 shine">
                 VIEW DEMO
               </Button>
             </Link>
@@ -119,10 +121,10 @@ export default function LandingPage() {
       </section>
 
       {/* Stats */}
-      <section className="py-16 px-6 border-y border-white/[0.06] bg-white/[0.02]">
+      <section className="py-16 px-6 border-y border-white/[0.06] bg-white/[0.02] relative">
         <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((stat, i) => (
-            <div key={i} className="text-center">
+            <div key={i} className="text-center stagger-item">
               <p className="text-4xl font-bold text-[#D6CCC2] mb-2">{stat.value}</p>
               <p className="text-sm tracking-widest text-white/40">{stat.label}</p>
             </div>
@@ -144,7 +146,7 @@ export default function LandingPage() {
             {features.map((feature, i) => {
               const Icon = feature.icon
               return (
-                <Card key={i} className="p-8 hover:bg-white/[0.03] transition-colors group">
+                <Card key={i} className="p-8 hover:bg-white/[0.03] transition-colors group stagger-item">
                   <div className="w-14 h-14 bg-[#D6CCC2]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#D6CCC2]/20 transition-colors">
                     <Icon size={28} className="text-[#D6CCC2]" />
                   </div>
@@ -171,7 +173,7 @@ export default function LandingPage() {
               { step: '02', title: 'Get Matched', desc: 'Our AI finds the perfect tasks based on your profile.' },
               { step: '03', title: 'Make Impact', desc: 'Volunteer, track hours, and see your contribution grow.' }
             ].map((item, i) => (
-              <div key={i} className="text-center">
+              <div key={i} className="text-center stagger-item">
                 <p className="text-6xl font-bold text-[#D6CCC2]/20 mb-4">{item.step}</p>
                 <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
                 <p className="text-white/50">{item.desc}</p>
@@ -190,7 +192,7 @@ export default function LandingPage() {
           
           <div className="grid md:grid-cols-2 gap-6">
             {testimonials.map((t, i) => (
-              <Card key={i} className="p-8">
+              <Card key={i} className="p-8 stagger-item">
                 <p className="text-lg text-white/70 mb-6 leading-relaxed">"{t.quote}"</p>
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-[#D6CCC2]/20 rounded-full flex items-center justify-center">
@@ -213,7 +215,7 @@ export default function LandingPage() {
           <h2 className="text-4xl font-bold mb-6">Ready to make a difference?</h2>
           <p className="text-white/50 mb-10 text-lg">Join thousands of volunteers already creating impact.</p>
           <Link to="/signup">
-            <Button className="bg-[#D6CCC2] text-[#0A0A0A] hover:bg-[#E3D5CA] text-lg px-10 py-4">
+            <Button className="bg-[#D6CCC2] text-[#0A0A0A] hover:bg-[#E3D5CA] text-lg px-10 py-4 shine">
               GET STARTED FREE <ArrowRight size={20} className="ml-2" />
             </Button>
           </Link>

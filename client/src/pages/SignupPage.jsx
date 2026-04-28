@@ -58,7 +58,9 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex flex-col">
+    <div className="min-h-screen bg-[#0A0A0A] flex flex-col relative overflow-hidden page-enter">
+      <div className="pointer-events-none absolute inset-0 bg-grid opacity-20" />
+      <div className="pointer-events-none absolute right-[-4rem] top-32 h-96 w-96 rounded-full bg-[#D6CCC2]/10 blur-3xl float-slow" />
       {/* Minimal Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50">
         <div className="flex items-center justify-between px-6 py-5">
@@ -75,8 +77,8 @@ export default function SignupPage() {
       </nav>
 
       {/* Centered Form */}
-      <div className="flex-1 flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-md">
+      <div className="flex-1 flex items-center justify-center px-4 py-12 relative z-10">
+        <div className="w-full max-w-md surface-glass rounded-3xl p-8 sm:p-10 shadow-[0_24px_80px_rgba(0,0,0,0.35)] animate-slide-up">
           <h2 className="text-4xl font-bold text-center mb-2 tracking-tight">
             Join<span className="text-[#D6CCC2]">.</span>
           </h2>
@@ -159,7 +161,7 @@ export default function SignupPage() {
 
             <Button 
               type="submit" 
-              className="w-full bg-[#D6CCC2] text-[#0A0A0A] hover:bg-[#E3D5CA]"
+              className="w-full bg-[#D6CCC2] text-[#0A0A0A] hover:bg-[#E3D5CA] shine"
               disabled={loading || !allMet}
               loading={loading}
             >

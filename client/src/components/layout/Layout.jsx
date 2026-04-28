@@ -1,10 +1,12 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { 
   Home, Users, Map, BarChart3, FileText, Upload, 
   Settings, LogOut, Menu, X, Search, Bell, Plus, ChevronLeft, Menu as MenuIcon, TrendingUp, HelpCircle
 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
+import { useTaskStore } from '../../store/taskStore'
+import { useVolunteerStore } from '../../store/volunteerStore'
 import { notifications as notificationsApi } from '../../api/client'
 import Avatar from '../ui/Avatar'
 
@@ -31,22 +33,31 @@ export default function Layout({ children }) {
   const location = useLocation()
   const navigate = useNavigate()
   const { user, role, logout } = useAuthStore()
+  const { fetchTasks } = useTaskStore()
+  const { fetchVolunteers, fetchProfile } = useVolunteerStore()
 
   const currentRole = role || 'volunteer'
   const filteredNav = navItems.filter(item => item.roles.includes(currentRole))
   const unreadCount = notifications.filter(n => !n.read).length
 
   useEffect(() => {
-    const fetchNotifications = async () => {
+    const refreshData = async () => {
       try {
         const res = await notificationsApi.getAll()
         setNotifications(res.data || [])
       } catch (err) {
         console.error('Failed to fetch notifications:', err)
       }
+      fetchTasks()
+      fetchVolunteers()
+      fetchProfile()
     }
-    fetchNotifications()
-  }, [])
+
+    refreshData()
+    const interval = setInterval(refreshData, 30000)
+
+    return () => clearInterval(interval)
+  }, [fetchTasks, fetchVolunteers, fetchProfile])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -68,10 +79,13 @@ export default function Layout({ children }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A]">
+    <div className="min-h-screen bg-[#0A0A0A] relative overflow-x-hidden page-enter">
+      <div className="pointer-events-none absolute inset-0 bg-grid opacity-30" />
+      <div className="pointer-events-none absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-[#D6CCC2]/10 blur-3xl float-slow" />
+      <div className="pointer-events-none absolute right-0 top-40 h-80 w-80 rounded-full bg-white/[0.03] blur-3xl float-slower" />
       {/* Minimal Topbar */}
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-[#0A0A0A]/90 backdrop-blur-md border-b border-white/[0.06]' : ''
+        scrolled ? 'bg-[#0A0A0A]/85 backdrop-blur-xl border-b border-white/[0.08] shadow-[0_12px_40px_rgba(0,0,0,0.35)]' : ''
       }`}>
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
@@ -103,7 +117,7 @@ export default function Layout({ children }) {
                 <Plus size={18} />
               </button>
             </Link>
-            <button className="p-2 hover:bg-white/5 rounded-lg transition-colors relative">
+            <button className="p-2 hover:bg-white/5 rounded-lg transition-colors relative shine">
               <Bell size={18} className="text-white/60" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#D6CCC2] rounded-full"></span>
             </button>
@@ -116,14 +130,14 @@ export default function Layout({ children }) {
 
       {/* Sidebar */}
       <aside className={`
-        fixed left-0 top-[56px] bottom-0 w-16 lg:w-56 bg-[#0A0A0A] border-r border-white/[0.06]
-        transition-all duration-300 z-40 flex flex-col
+        fixed left-0 top-[56px] bottom-0 w-16 lg:w-56 surface-panel
+        transition-all duration-300 z-40 flex flex-col backdrop-blur-xl
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         {/* Toggle */}
         <button 
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="hidden lg:flex p-3 hover:bg-white/5 justify-end"
+          className="hidden lg:flex p-3 hover:bg-white/5 justify-end transition-colors"
         >
           <ChevronLeft size={16} className={`text-white/30 transition-transform ${sidebarCollapsed ? 'rotate-180' : ''}`} />
         </button>
@@ -140,10 +154,10 @@ export default function Layout({ children }) {
                 to={item.path}
                 onClick={() => setMobileOpen(false)}
                 className={`
-                  flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
+                  flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200
                   ${isActive 
-                    ? 'bg-white/[0.06] text-[#D6CCC2]' 
-                    : 'text-white/50 hover:text-white hover:bg-white/[0.03]'
+                    ? 'bg-white/[0.08] text-[#D6CCC2] shadow-[0_12px_30px_rgba(0,0,0,0.18)]' 
+                    : 'text-white/50 hover:text-white hover:bg-white/[0.04]'
                   }
                   ${sidebarCollapsed ? 'justify-center' : ''}
                 `}
@@ -166,10 +180,10 @@ export default function Layout({ children }) {
         <div className="p-2 border-t border-white/[0.06] space-y-1">
           <Link
             to="/settings"
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors ${
               location.pathname === '/settings'
-                ? 'bg-white/[0.06] text-[#D6CCC2]'
-                : 'text-white/50 hover:text-white hover:bg-white/[0.03]'
+                  ? 'bg-white/[0.08] text-[#D6CCC2]'
+                  : 'text-white/50 hover:text-white hover:bg-white/[0.04]'
             }`}
           >
             <Settings size={18} />
@@ -179,10 +193,10 @@ export default function Layout({ children }) {
           </Link>
           <Link
             to="/help"
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors ${
               location.pathname === '/help'
-                ? 'bg-white/[0.06] text-[#D6CCC2]'
-                : 'text-white/50 hover:text-white hover:bg-white/[0.03]'
+                  ? 'bg-white/[0.08] text-[#D6CCC2]'
+                  : 'text-white/50 hover:text-white hover:bg-white/[0.04]'
             }`}
           >
             <HelpCircle size={18} />
@@ -192,7 +206,7 @@ export default function Layout({ children }) {
           </Link>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/50 hover:text-white hover:bg-white/[0.03] transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/50 hover:text-white hover:bg-white/[0.04] transition-colors"
           >
             <LogOut size={18} />
             <span className={`text-sm tracking-wide ${sidebarCollapsed ? 'hidden lg:block' : 'block'}`}>
@@ -212,10 +226,10 @@ export default function Layout({ children }) {
 
       {/* Main Content */}
       <main className={`
-        pt-[56px] min-h-screen transition-all duration-300
+        pt-[56px] min-h-screen transition-all duration-300 relative
         ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-56'}
       `}>
-        <div className="p-4 sm:p-6 lg:p-8">
+        <div className="p-4 sm:p-6 lg:p-8 relative z-10">
           {children}
         </div>
       </main>

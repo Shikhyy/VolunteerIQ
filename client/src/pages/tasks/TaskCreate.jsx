@@ -89,20 +89,30 @@ export default function TaskCreate() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
     const taskData = {
-      ...form,
-      status: 'open',
+      title: form.title,
+      description: form.description,
+      category: form.category,
+      urgency: form.urgency,
+      deadline: form.deadline,
+      slotsNeeded: form.slotsNeeded,
       slotsFilled: 0,
+      requiredSkills: form.requiredSkills,
+      location: {
+        address: form.location.address,
+        city: form.location.city,
+        district: form.location.district,
+      },
+      status: 'open',
       priorityScore: (form.urgency / 5) * 0.4,
     }
     
     if (editId) {
-      updateTask(editId, taskData)
+      await updateTask(editId, taskData)
     } else {
-      addTask(taskData)
+      await addTask(taskData)
     }
+    setLoading(false)
     navigate('/admin/tasks')
   }
 

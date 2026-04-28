@@ -21,19 +21,18 @@ export default function VolunteerDashboard() {
   const { tasks, myTasks } = useTaskStore()
   const { myProfile } = useVolunteerStore()
   const [activeTab, setActiveTab] = useState('active')
-  const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    setLoading(true)
-    const timer = setTimeout(() => setLoading(false), 300)
-    return () => clearTimeout(timer)
-  }, [activeTab])
+  const taskSource = myTasks.length > 0 ? myTasks : tasks
+  const visibleTasks = taskSource.filter((task) => {
+    if (activeTab === 'active') return task.status !== 'completed'
+    if (activeTab === 'pending') return task.status === 'open'
+    return task.status === 'completed'
+  })
 
   const statsData = [
-    { label: 'MY TASKS', value: myTasks.length, icon: CheckCircle, color: 'text-[#D6CCC2]' },
+    { label: 'MY TASKS', value: taskSource.length, icon: CheckCircle, color: 'text-[#D6CCC2]' },
     { label: 'COMPLETED', value: myProfile?.tasksCompleted || 0, icon: Award, color: 'text-[#D5BDAF]' },
-    { label: 'HOURS', value: myProfile?.hoursVolunteered || 0, icon: Clock, color: 'text-[#E3D5CA]' },
-    { label: 'TEAM', value: myProfile?.teamSize || 0, icon: Users, color: 'text-white/60' },
+    { label: 'HOURS', value: myProfile?.hoursVolunteered || myProfile?.hoursContributed || 0, icon: Clock, color: 'text-[#E3D5CA]' },
+    { label: 'TEAM', value: myProfile?.teamSize || myProfile?.tasksCompleted || 0, icon: Users, color: 'text-white/60' },
   ]
 
   const tabs = [
@@ -46,7 +45,7 @@ export default function VolunteerDashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
+        <div className="animate-fade-in">
           <h1 className="text-3xl font-bold tracking-tight">
             Welcome back<span className="text-[#D6CCC2]">.</span>
           </h1>
@@ -55,18 +54,18 @@ export default function VolunteerDashboard() {
           </p>
         </div>
         <Link to="/tasks">
-          <Button className="bg-[#D6CCC2] text-[#0A0A0A] hover:bg-[#E3D5CA] gap-2">
+          <Button className="bg-[#D6CCC2] text-[#0A0A0A] hover:bg-[#E3D5CA] gap-2 shine">
             <Plus size={18} /> FIND TASKS
           </Button>
         </Link>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/[0.06]">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/[0.06] animate-stagger">
         {statsData.map((stat, idx) => {
           const Icon = stat.icon
           return (
-            <div key={idx} className="group p-6 bg-[#0A0A0A] hover:bg-[#111] transition-all duration-500">
+            <div key={idx} className="group p-6 bg-[#0A0A0A] hover:bg-[#111] transition-all duration-500 animate-slide-up" style={{animationDelay: `${idx * 100}ms`}}>
               <Icon size={20} className={`${stat.color} mb-4`} />
               <p className="text-3xl font-bold tracking-tight">{stat.value}</p>
               <p className="text-xs tracking-[0.15em] text-white/40 mt-1">{stat.label}</p>
@@ -117,16 +116,10 @@ export default function VolunteerDashboard() {
         </div>
 
         <div className="p-6">
-          {loading ? (
-            <div className="space-y-4">
-              {[1,2,3,4].map(i => (
-                <div key={i} className="h-32 bg-white/[0.02] rounded-xl animate-pulse" />
-              ))}
-            </div>
-          ) : myTasks.length === 0 ? (
+          {visibleTasks.length === 0 ? (
             <div className="text-center py-16">
               <Target size={40} className="text-white/20 mx-auto mb-4" />
-              <p className="text-white/40 mb-4 tracking-wide">No active tasks</p>
+              <p className="text-white/40 mb-4 tracking-wide">No tasks in this view</p>
               <Link to="/tasks">
                 <Button variant="ghost" className="text-[#D6CCC2] gap-2">
                   Browse available tasks <ArrowRight size={16} />
@@ -134,11 +127,12 @@ export default function VolunteerDashboard() {
               </Link>
             </div>
           ) : (
-            <div className="space-y-4">
-              {myTasks.map((task) => (
+            <div className="space-y-4 animate-stagger">
+              {visibleTasks.map((task, idx) => (
                 <div
                   key={task.id}
-                  className="group p-5 bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.06] hover:border-white/[0.1] rounded-xl transition-all"
+                  className="group p-5 bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.06] hover:border-white/[0.1] rounded-xl transition-all animate-slide-up"
+                  style={{animationDelay: `${idx * 50}ms`}}
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex gap-2">
@@ -203,10 +197,10 @@ export default function VolunteerDashboard() {
             View all
           </Link>
         </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {tasks.slice(0, 3).map((task) => (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 animate-stagger">
+          {tasks.slice(0, 3).map((task, idx) => (
             <Link key={task.id} to={`/tasks/${task.id}`}>
-              <div className="group p-5 bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.06] hover:border-white/[0.1] rounded-xl transition-all h-full">
+              <div className="group p-5 bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.06] hover:border-white/[0.1] rounded-xl transition-all h-full animate-slide-up" style={{animationDelay: `${idx * 100}ms`}}>
                 <div className="flex gap-2 mb-3">
                   <Badge variant={urgencyVariant[task.urgency]} className="text-[10px]">
                     {urgencyVariant[task.urgency]}

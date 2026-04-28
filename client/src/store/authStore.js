@@ -35,11 +35,7 @@ export const useAuthStore = create((set, get) => ({
   },
 
   loginWithGoogle: async () => {
-    // For demo, use mock Google login
-    const mockUser = { uid: 'google-user', email: 'user@gmail.com', displayName: 'Google User', role: 'volunteer' }
-    localStorage.setItem('authToken', 'google-token')
-    set({ user: mockUser, role: 'volunteer' })
-    return mockUser
+    throw new Error('Google sign-in is not configured in this workspace')
   },
 
   logout: async () => {
@@ -54,7 +50,7 @@ export const useAuthStore = create((set, get) => ({
 
   initAuth: async () => {
     const token = localStorage.getItem('authToken')
-    if (token && token !== 'dev-token' && token !== 'google-token') {
+    if (token) {
       try {
         const { data } = await auth.me()
         set({ user: data.user, role: data.user.role || 'volunteer', loading: false })

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Layers, Search, Filter, X, MapPin, Users, Clock, ChevronRight, ArrowLeft } from 'lucide-react'
 import { Card, Badge, Button } from '../../components/ui'
 import { useAuthStore } from '../../store/authStore'
+import { tasks as tasksApi } from '../../api/client'
 
 const urgencyVariant = {
   5: 'critical',
@@ -32,8 +33,7 @@ export default function MapView() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('http://localhost:3001/api/tasks')
-      const data = await res.json()
+      const { data } = await tasksApi.list()
       setTasks(data || [])
     } catch (err) {
       console.error('Failed to fetch tasks:', err)
