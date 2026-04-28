@@ -1,256 +1,220 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Sparkles, ArrowRight, ChevronDown, Play, Menu, X } from 'lucide-react'
-import { Button } from '../components/ui'
+import { ArrowRight, Heart, Users, MapPin, Sparkles, Shield, Clock, CheckCircle } from 'lucide-react'
+import { Button, Card } from '../components/ui'
 
-const words = [
-  { word: 'IMPACT', color: '#D6CCC2' },
-  { word: 'PURPOSE', color: '#D5BDAF' },
-  { word: 'COMMUNITY', color: '#E3D5CA' },
-  { word: 'CHANGE', color: '#D6CCC2' },
-  { word: 'CONNECTION', color: '#D5BDAF' },
+const features = [
+  {
+    icon: Sparkles,
+    title: 'AI-Powered Matching',
+    description: 'Smart algorithms match volunteers with tasks based on skills, location, and availability.'
+  },
+  {
+    icon: MapPin,
+    title: 'Real-Time Coordination',
+    description: 'Track tasks, volunteers, and impact across all locations in one dashboard.'
+  },
+  {
+    icon: Users,
+    title: 'Volunteer Management',
+    description: 'Build your team with profiles, skill tracking, and performance metrics.'
+  },
+  {
+    icon: Shield,
+    title: 'Reliability Scoring',
+    description: 'Trust-based system tracks volunteer commitment and task completion.'
+  }
+]
+
+const stats = [
+  { value: '10K+', label: 'Volunteers' },
+  { value: '50K+', label: 'Tasks Completed' },
+  { value: '200+', label: 'Organizations' },
+  { value: '98%', label: 'Satisfaction' }
+]
+
+const testimonials = [
+  {
+    name: 'Priya Sharma',
+    role: 'Medical Volunteer',
+    quote: 'VolunteerIQ made it so easy to find meaningful work near me. The AI matching is incredible!'
+  },
+  {
+    name: 'Raj Patel',
+    role: 'NGO Coordinator',
+    quote: 'Managing 500+ volunteers was chaos. Now it\'s effortless. Highly recommended.'
+  }
 ]
 
 export default function LandingPage() {
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [currentWord, setCurrentWord] = useState(0)
-  const [isLoaded, setIsLoaded] = useState(false)
-  const [textProgress, setTextProgress] = useState(0)
-  const heroRef = useRef(null)
-
-  const fullText = "VolunteerIQ"
+  const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    setIsLoaded(true)
-    
-    const wordInterval = setInterval(() => {
-      setCurrentWord(prev => (prev + 1) % words.length)
-    }, 3000)
-    
-    return () => clearInterval(wordInterval)
-  }, [])
-
-  useEffect(() => {
-    let progress = 0
-    const interval = setInterval(() => {
-      progress += 1
-      setTextProgress(progress)
-      if (progress >= fullText.length) clearInterval(interval)
-    }, 80)
-    return () => clearInterval(interval)
-  }, [])
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrolled = window.scrollY
-      if (heroRef.current) {
-        heroRef.current.style.transform = `translateY(${scrolled * 0.3}px)`
-      }
-    }
+    const handleScroll = () => setScrolled(window.scrollY > 50)
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white overflow-x-hidden">
-      {/* Minimal Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
-        <div className="flex items-center justify-between px-6 py-5">
-          {/* Logo Text */}
+    <div className="min-h-screen bg-[#0A0A0A]">
+      {/* Navigation */}
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-[#0A0A0A]/95 backdrop-blur-md border-b border-white/[0.06]' : ''}`}>
+        <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <span className="font-bold text-xl tracking-[0.2em]">
-              {fullText.slice(0, textProgress)}
-              <span className="inline-block w-2 h-5 bg-[#D6CCC2] ml-0.5 animate-pulse" />
-            </span>
+            <div className="w-10 h-10 bg-[#D6CCC2] rounded-xl flex items-center justify-center">
+              <span className="text-xl font-bold text-[#0A0A0A]">V</span>
+            </div>
+            <span className="font-bold text-xl tracking-[0.1em] text-white">VolunteerIQ</span>
           </Link>
-
-          {/* Hamburger Menu */}
-          <button 
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="relative w-8 h-8 flex flex-col items-center justify-center gap-1.5"
-          >
-            <span className={`w-6 h-px bg-white transition-all ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} />
-            <span className={`w-6 h-px bg-white transition-all ${menuOpen ? 'opacity-0' : ''}`} />
-            <span className={`w-6 h-px bg-white transition-all ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
-          </button>
+          <div className="hidden md:flex items-center gap-8">
+            <Link to="/#features" className="text-white/50 hover:text-white transition-colors text-sm tracking-wide">Features</Link>
+            <Link to="/#about" className="text-white/50 hover:text-white transition-colors text-sm tracking-wide">About</Link>
+            <Link to="/#testimonials" className="text-white/50 hover:text-white transition-colors text-sm tracking-wide">Testimonials</Link>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link to="/login">
+              <Button variant="ghost" className="text-white/70">LOGIN</Button>
+            </Link>
+            <Link to="/signup">
+              <Button className="bg-[#D6CCC2] text-[#0A0A0A] hover:bg-[#E3D5CA]">GET STARTED</Button>
+            </Link>
+          </div>
         </div>
       </nav>
 
-      {/* Full Screen Menu Overlay */}
-      <div className={`fixed inset-0 z-40 bg-[#0A0A0A] transition-all duration-500 ${menuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-        <div className="flex flex-col items-center justify-center h-full space-y-8">
-          {['Home', 'Explore', 'About', 'Contact'].map((item, idx) => (
-            <Link 
-              key={item}
-              to={item === 'Home' ? '/' : '#'}
-              onClick={() => setMenuOpen(false)}
-              className="text-4xl font-light tracking-[0.2em] hover:text-[#D6CCC2] transition-colors"
-              style={{ animationDelay: `${idx * 100}ms` }}
-            >
-              {item.toUpperCase()}
-            </Link>
-          ))}
-          <Link to="/login" onClick={() => setMenuOpen(false)}>
-            <Button variant="ghost" className="text-white mt-8">Sign In</Button>
-          </Link>
-        </div>
-      </div>
-
-      {/* Hero Section - Full Screen */}
-      <section ref={heroRef} className="relative min-h-screen flex items-center justify-center">
-        {/* Background Effects */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A0A] via-[#151515] to-[#0A0A0A]" />
-        <div className="absolute inset-0 opacity-40">
-          <div className="absolute top-[20%] left-[10%] w-[500px] h-[500px] bg-[#D6CCC2] rounded-full blur-[200px]" />
-          <div className="absolute bottom-[20%] right-[10%] w-[400px] h-[400px] bg-[#D5BDAF] rounded-full blur-[150px]" />
-        </div>
-
-        {/* Grid Pattern */}
-        <div className="absolute inset-0 opacity-[0.02]" style={{
-          backgroundImage: `linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)`,
-          backgroundSize: '80px 80px'
-        }} />
-
-        <div className={`relative z-10 text-center px-4 transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          {/* Rotating Word */}
-          <div className="mb-12">
-            <div className="h-16 sm:h-20 flex items-center justify-center overflow-hidden">
-              {words.map((item, idx) => (
-                <span 
-                  key={idx}
-                  className={`absolute text-5xl sm:text-7xl font-bold tracking-[0.15em] transition-all duration-700 ${
-                    idx === currentWord 
-                      ? 'opacity-100 scale-100' 
-                      : 'opacity-0 scale-105'
-                  }`}
-                  style={{ color: item.color, letterSpacing: '0.2em' }}
-                >
-                  {item.word}
-                </span>
-              ))}
-            </div>
+      {/* Hero Section */}
+      <section className="relative pt-40 pb-32 px-6 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#D6CCC2]/10 via-transparent to-transparent" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#D6CCC2]/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#D6CCC2]/5 rounded-full blur-3xl" />
+        
+        <div className="max-w-5xl mx-auto text-center relative">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/[0.03] border border-white/[0.06] rounded-full mb-8">
+            <Sparkles size={14} className="text-[#D6CCC2]" />
+            <span className="text-xs tracking-widest text-white/60">AI-POWERED VOLUNTEER COORDINATION</span>
           </div>
-
-          <h1 className="text-6xl sm:text-8xl lg:text-9xl font-bold mb-8 tracking-[0.1em]">
-            for <span className="text-[#D6CCC2]">communities</span>
+          
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-tight">
+            Connect. Contribute.<span className="text-[#D6CCC2]">Impact.</span>
           </h1>
           
-          <p className="text-lg sm:text-xl text-white/50 max-w-xl mx-auto mb-12 tracking-wide font-light">
-            AI-powered platform that intelligently maps volunteers to the highest-priority tasks and regions worldwide.
+          <p className="text-xl text-white/50 max-w-2xl mx-auto mb-10 leading-relaxed">
+            The intelligent platform that matches volunteers with meaningful opportunities. 
+            Save time, increase engagement, and maximize your social impact.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link to="/signup">
-              <Button size="lg" className="bg-[#D6CCC2] text-[#0A0A0A] hover:bg-[#E3D5CA] gap-3 px-10 tracking-[0.1em] text-base">
-                START <ArrowRight size={20} />
+              <Button className="bg-[#D6CCC2] text-[#0A0A0A] hover:bg-[#E3D5CA] text-lg px-8 py-4">
+                START FOR FREE <ArrowRight size={20} className="ml-2" />
               </Button>
             </Link>
-            <Link to="/admin">
-              <Button size="lg" variant="ghost" className="text-white/70 hover:text-white gap-3 tracking-[0.1em]">
-                <Play size={18} /> WATCH
+            <Link to="/login">
+              <Button variant="ghost" className="text-white/60 hover:text-white text-lg px-8 py-4">
+                VIEW DEMO
               </Button>
             </Link>
           </div>
         </div>
+      </section>
 
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
-          <span className="text-xs tracking-[0.3em] text-white/30 uppercase">Scroll</span>
-          <ChevronDown size={20} className="text-white/20 animate-bounce" />
+      {/* Stats */}
+      <section className="py-16 px-6 border-y border-white/[0.06] bg-white/[0.02]">
+        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+          {stats.map((stat, i) => (
+            <div key={i} className="text-center">
+              <p className="text-4xl font-bold text-[#D6CCC2] mb-2">{stat.value}</p>
+              <p className="text-sm tracking-widest text-white/40">{stat.label}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-32 px-6 bg-[#0A0A0A]">
-        <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/[0.06]">
-            {[
-              { value: '2,500+', label: 'VOLUNTEERS', icon: '👤' },
-              { value: '850+', label: 'TASKS', icon: '🎯' },
-              { value: '150+', label: 'NGOs', icon: '🏠' },
-              { value: '50K+', label: 'HOURS', icon: '⏱️' },
-            ].map((stat, idx) => (
-              <div key={idx} className="group p-10 bg-[#0A0A0A] hover:bg-[#111] transition-all duration-500">
-                <span className="text-4xl block mb-4">{stat.icon}</span>
-                <p className="text-4xl sm:text-5xl font-bold text-[#D6CCC2] mb-2 tracking-tight">{stat.value}</p>
-                <p className="text-xs tracking-[0.2em] text-white/40">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-32 px-6 bg-[#0A0A0A] border-t border-white/[0.06]">
-        <div className="max-w-5xl mx-auto">
+      {/* Features */}
+      <section id="features" className="py-32 px-6">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-20">
-            <span className="text-xs tracking-[0.3em] text-[#D6CCC2] uppercase">What We Do</span>
-            <h2 className="text-5xl sm:text-6xl font-bold mt-4 tracking-tight">EVERYTHING YOU NEED</h2>
+            <h2 className="text-4xl font-bold mb-4">Everything you need<span className="text-[#D6CCC2]">.</span></h2>
+            <p className="text-white/50 max-w-xl mx-auto">
+              Powerful features designed for modern volunteer coordination
+            </p>
           </div>
-
-          <div className="grid md:grid-cols-3 gap-px bg-white/[0.06]">
-            {[
-              { icon: '✨', title: 'AI Matching', desc: 'Gemini intelligently matches volunteers to tasks based on skills, location, and availability.' },
-              { icon: '🗺️', title: 'Live Maps', desc: 'Visualize task density and volunteer coverage gaps on interactive maps.' },
-              { icon: '📊', title: 'Priority', desc: 'Multi-factor algorithm scores tasks by urgency, deadline, and regional need.' },
-              { icon: '👥', title: 'Volunteers', desc: 'Self-service profiles with skill tracking and availability calendar.' },
-              { icon: '🔒', title: 'Secure', desc: 'Role-based access with Firebase authentication.' },
-              { icon: '📁', title: 'Import', desc: 'CSV bulk import for field data ingestion.' },
-            ].map((feature, idx) => (
-              <div 
-                key={idx}
-                className="group p-10 bg-[#0A0A0A] hover:bg-[#111] transition-all duration-500"
-              >
-                <span className="text-4xl block mb-6">{feature.icon}</span>
-                <h3 className="text-xl font-semibold mb-3 tracking-wide">{feature.title}</h3>
-                <p className="text-white/50 text-sm leading-relaxed">
-                  {feature.desc}
-                </p>
-              </div>
-            ))}
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            {features.map((feature, i) => {
+              const Icon = feature.icon
+              return (
+                <Card key={i} className="p-8 hover:bg-white/[0.03] transition-colors group">
+                  <div className="w-14 h-14 bg-[#D6CCC2]/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#D6CCC2]/20 transition-colors">
+                    <Icon size={28} className="text-[#D6CCC2]" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
+                  <p className="text-white/50 leading-relaxed">{feature.description}</p>
+                </Card>
+              )
+            })}
           </div>
         </div>
       </section>
 
       {/* How It Works */}
-      <section className="py-32 px-6 bg-[#0A0A0A] border-t border-white/[0.06]">
-        <div className="max-w-3xl mx-auto text-center">
-          <span className="text-xs tracking-[0.3em] text-[#D6CCC2] uppercase">Process</span>
-          <h2 className="text-5xl sm:text-6xl font-bold mt-4 mb-16 tracking-tight">HOW IT WORKS</h2>
+      <section className="py-32 px-6 bg-white/[0.02]">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl font-bold mb-4">How it works<span className="text-[#D6CCC2]">.</span></h2>
+            <p className="text-white/50">Get started in three simple steps</p>
+          </div>
           
-          <div className="grid md:grid-cols-3 gap-12">
+          <div className="grid md:grid-cols-3 gap-8">
             {[
-              { step: '01', title: 'CREATE', desc: 'NGOs create tasks or import from CSV' },
-              { step: '02', title: 'MATCH', desc: 'AI ranks best volunteers' },
-              { step: '03', title: 'TRACK', desc: 'Monitor impact live' },
-            ].map((item, idx) => (
-              <div key={idx} className="relative">
-                {idx < 2 && (
-                  <div className="hidden md:block absolute top-10 left-full w-full h-px bg-gradient-to-r from-white/10 to-transparent" />
-                )}
-                <div className="w-16 h-16 border border-[#D6CCC2]/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-sm font-bold text-[#D6CCC2]">{item.step}</span>
-                </div>
-                <h3 className="text-lg font-semibold mb-2 tracking-[0.15em]">{item.title}</h3>
-                <p className="text-white/50 text-sm">{item.desc}</p>
+              { step: '01', title: 'Create Profile', desc: 'Sign up and list your skills, availability, and location.' },
+              { step: '02', title: 'Get Matched', desc: 'Our AI finds the perfect tasks based on your profile.' },
+              { step: '03', title: 'Make Impact', desc: 'Volunteer, track hours, and see your contribution grow.' }
+            ].map((item, i) => (
+              <div key={i} className="text-center">
+                <p className="text-6xl font-bold text-[#D6CCC2]/20 mb-4">{item.step}</p>
+                <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
+                <p className="text-white/50">{item.desc}</p>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section id="testimonials" className="py-32 px-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4">Loved by volunteers<span className="text-[#D6CCC2]">.</span></h2>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            {testimonials.map((t, i) => (
+              <Card key={i} className="p-8">
+                <p className="text-lg text-white/70 mb-6 leading-relaxed">"{t.quote}"</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-[#D6CCC2]/20 rounded-full flex items-center justify-center">
+                    <span className="text-[#D6CCC2] font-bold">{t.name[0]}</span>
+                  </div>
+                  <div>
+                    <p className="font-medium">{t.name}</p>
+                    <p className="text-sm text-white/40">{t.role}</p>
+                  </div>
+                </div>
+              </Card>
             ))}
           </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="py-40 px-6 bg-[#0A0A0A] border-t border-white/[0.06]">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-5xl sm:text-6xl font-bold mb-6 tracking-tight">
-            Ready to make an <span className="text-[#D6CCC2]">impact</span>?
-          </h2>
-          <p className="text-white/50 text-lg mb-10">
-            Join thousands of volunteers already helping their communities.
-          </p>
+      <section className="py-24 px-6 bg-[#D6CCC2]/5">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-4xl font-bold mb-6">Ready to make a difference?</h2>
+          <p className="text-white/50 mb-10 text-lg">Join thousands of volunteers already creating impact.</p>
           <Link to="/signup">
-            <Button size="lg" className="bg-[#D6CCC2] text-[#0A0A0A] hover:bg-[#E3D5CA] px-12 tracking-[0.1em]">
-              GET STARTED <ArrowRight size={20} className="ml-2" />
+            <Button className="bg-[#D6CCC2] text-[#0A0A0A] hover:bg-[#E3D5CA] text-lg px-10 py-4">
+              GET STARTED FREE <ArrowRight size={20} className="ml-2" />
             </Button>
           </Link>
         </div>
@@ -258,16 +222,14 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="py-12 px-6 border-t border-white/[0.06]">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-[#D6CCC2] rounded-full flex items-center justify-center">
-              <span className="font-bold text-sm text-[#0A0A0A]">V</span>
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-[#D6CCC2] rounded-lg flex items-center justify-center">
+              <span className="font-bold text-[#0A0A0A]">V</span>
             </div>
-            <span className="text-white/60 tracking-wide">VolunteerIQ</span>
+            <span className="font-bold tracking-[0.1em] text-white">VolunteerIQ</span>
           </div>
-          <p className="text-sm text-white/30">
-            © 2026 VolunteerIQ. Built for Good.
-          </p>
+          <p className="text-sm text-white/30">© 2026 VolunteerIQ. All rights reserved.</p>
         </div>
       </footer>
     </div>
