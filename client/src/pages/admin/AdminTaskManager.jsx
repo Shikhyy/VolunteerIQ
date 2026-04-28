@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { 
   Users, Clock, CheckCircle, TrendingUp, FileText, Upload, 
@@ -27,14 +27,7 @@ export default function AdminTaskManager() {
   const { tasks } = useTaskStore()
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('')
-  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
-
-  useEffect(() => {
-    setLoading(true)
-    const timer = setTimeout(() => setLoading(false), 300)
-    return () => clearTimeout(timer)
-  }, [search, status])
 
   const handleEdit = (taskId) => {
     console.log('Edit task:', taskId)
@@ -111,18 +104,7 @@ export default function AdminTaskManager() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.06]">
-              {loading ? (
-                <>
-                  {[1,2,3,4].map(i => (
-                    <tr key={i}>
-                      <td colSpan={7} className="px-6 py-4">
-                        <div className="h-6 bg-white/[0.02] rounded animate-pulse" />
-                      </td>
-                    </tr>
-                  ))}
-                </>
-              ) : (
-              filteredTasks.map((task) => (
+              {filteredTasks.map((task) => (
                 <tr key={task.id} className="hover:bg-white/[0.02]">
                   <td className="px-6 py-4">
                     <p className="font-medium text-white">{task.title}</p>
@@ -143,13 +125,11 @@ export default function AdminTaskManager() {
                     {task.deadline ? new Date(task.deadline).toLocaleDateString() : '-'}
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-1">
-                      <button className="p-1.5 hover:bg-white/10 rounded" title="View">
-                        <Link to={`/tasks/${task.id}`}>
-                          <Eye size={14} className="text-white/50" />
-                        </Link>
+                    <div className="flex items-center gap-2">
+                      <button className="p-1.5 hover:bg-white/10 rounded" title="View" onClick={() => navigate(`/tasks/${task.id}`)}>
+                        <Eye size={14} className="text-white/50" />
                       </button>
-                      <button className="p-1.5 hover:bg-white/10 rounded" title="Edit" onClick={() => handleEdit(task.id)}>
+                      <button className="p-1.5 hover:bg-white/10 rounded" title="Edit" onClick={() => navigate(`/tasks/create?edit=${task.id}`)}>
                         <Edit size={14} className="text-white/50" />
                       </button>
                       <button className="p-1.5 hover:bg-white/10 rounded" title="Delete" onClick={() => handleDelete(task.id)}>
@@ -159,7 +139,6 @@ export default function AdminTaskManager() {
                   </td>
                 </tr>
               ))}
-              )}
             </tbody>
           </table>
         </div>
