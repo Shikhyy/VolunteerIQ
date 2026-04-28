@@ -25,6 +25,8 @@ export default function Layout({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [notifications, setNotifications] = useState([])
+  const [showSearch, setShowSearch] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
   const location = useLocation()
   const navigate = useNavigate()
   const { user, role, logout } = useAuthStore()
@@ -58,6 +60,12 @@ export default function Layout({ children }) {
     navigate('/login')
   }
 
+  const handleSearch = (e) => {
+    e.preventDefault()
+    navigate(`/tasks?search=${encodeURIComponent(searchQuery)}`)
+    setShowSearch(false)
+  }
+
   return (
     <div className="min-h-screen bg-[#0A0A0A]">
       {/* Minimal Topbar */}
@@ -80,17 +88,13 @@ export default function Layout({ children }) {
             </Link>
           </div>
 
-          {/* Search (Desktop) */}
-          <div className="hidden md:flex flex-1 max-w-md mx-8">
-            <div className="relative w-full">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
-              <input 
-                type="text" 
-                placeholder="SEARCH..."
-                className="w-full h-9 pl-9 pr-4 bg-white/[0.03] border border-white/[0.06] rounded-lg text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#D6CCC2]/50 uppercase tracking-wider"
-              />
-            </div>
-          </div>
+          {/* Search Button */}
+          <button 
+            onClick={() => setShowSearch(true)} 
+            className="hidden md:flex p-2 hover:bg-white/10 rounded-lg transition-colors"
+          >
+            <Search size={18} className="text-white/60" />
+          </button>
 
           <div className="flex items-center gap-2">
             <Link to="/tasks/create" className="hidden sm:flex">
@@ -197,6 +201,27 @@ export default function Layout({ children }) {
           {children}
         </div>
       </main>
+
+      {/* Search Modal */}
+      {showSearch && (
+        <div className="fixed inset-0 bg-black/50 flex items-start justify-center pt-20 z-50" onClick={() => setShowSearch(false)}>
+          <div className="bg-[#111] rounded-xl p-6 w-full max-w-lg border border-white/10" onClick={e => e.stopPropagation()}>
+            <form onSubmit={handleSearch}>
+              <input
+                type="text"
+                placeholder="Search tasks..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full h-12 px-4 bg-white/[0.03] border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-[#D6CCC2]/50"
+                autoFocus
+              />
+            </form>
+            <div className="mt-4">
+              <p className="text-xs text-white/40">Press Enter to search tasks</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
